@@ -1,58 +1,81 @@
+const products = [
+  {
+    id: 1,
+    nome: "Whey Protein",
+    preco: 119.90,
+    imagem: "assets/products/wheyhd.png"
+  },
+  {
+    id: 2,
+    nome: "Creatina",
+    preco: 89.90,
+    imagem: "assets/products/creatinaabsolut.png"
+  },
+  {
+    id: 3,
+    nome: "Bone Crusher",
+    preco: 89.90,
+    imagem: "assets/products/bonecrusher.png"
+  },
+  {
+    id: 4,
+    nome: "Colageno",
+    preco: 89.90,
+    imagem: "assets/products/colageno.png"
+  },
+  {
+    id: 5,
+    nome: "Creatina Black",
+    preco: 89.90,
+    imagem: "assets/products/creatinablackskull.png"
+  },
+  {
+    id: 6,
+    nome: "Creatina Mono",
+    preco: 89.90,
+    imagem: "assets/products/creatinamono.png"
+  },
+  {
+    id: 7,
+    nome: "Multi",
+    preco: 89.90,
+    imagem: "assets/products/multi.png"
+  },
+  {
+    id: 8,
+    nome: "WHEY INTEGRAL",
+    preco: 89.90,
+    imagem: "assets/products/wheyintegral.png"
+  },
+  {
+    id: 9,
+    nome: "wheymax",
+    preco: 89.90,
+    imagem: "assets/products/wheymax.png"
+  },
 
-fetch("http://localhost:3000/products")
-  .then(res => res.json())
-  .then(data => {
-    const container = document.getElementById("products");
+  {
+    id: 9,
+    nome: "WHEY ZEO",
+    preco: 89.90,
+    imagem: "assets/products/wheyzero.png"
+  },
+ 
+  // depois você adiciona os outros 10
+];
 
-    data.forEach(p => {
-      container.innerHTML += `
-        <div class="card">
-          <img src="${p.image}" width="150" />
-          <h3>${p.name}</h3>
-          <p>${p.description}</p>
-          <strong>R$ ${p.price}</strong>
-        </div>
-      `;
-    });
-  });
+const productsContainer = document.getElementById("products");
 
-const express = require("express");
-const cors = require("cors");
-const sqlite3 = require("sqlite3").verbose();
+products.forEach(product => {
+  const card = document.createElement("div");
+  card.className = "product-card";
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+  card.innerHTML = `
+    <img src="${product.imagem}" alt="${product.nome}">
+    <h3>${product.nome}</h3>
+    <p>R$ ${product.preco.toFixed(2)}</p>
+    <button>Adicionar ao carrinho</button>
+  `;
 
-const db = new sqlite3.Database("./database.sqlite");
-
-// Criar tabela
-db.run(`
-  CREATE TABLE IF NOT EXISTS products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    price REAL,
-    image TEXT,
-    description TEXT
-  )
-`);
-
-// Produtos mock
-db.run(`
-  INSERT INTO products (name, price, image, description)
-  VALUES 
-  ('Whey Protein', 129.90, 'https://via.placeholder.com/150', 'Whey concentrado 1kg'),
-  ('Creatina', 79.90, 'https://via.placeholder.com/150', 'Creatina monohidratada'),
-  ('Pré-Treino', 99.90, 'https://via.placeholder.com/150', 'Energia e foco')
-`);
-
-// Listar produtos
-app.get("/products", (req, res) => {
-  db.all("SELECT * FROM products", [], (err, rows) => {
-    res.json(rows);
-  });
-});
-
-app.listen(3000, () => {
-  console.log("API rodando em http://localhost:3000");
+  productsContainer.appendChild(card);
 });
