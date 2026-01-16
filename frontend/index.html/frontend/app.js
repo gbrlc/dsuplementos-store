@@ -1,3 +1,21 @@
+
+fetch("http://localhost:3000/products")
+  .then(res => res.json())
+  .then(data => {
+    const container = document.getElementById("products");
+
+    data.forEach(p => {
+      container.innerHTML += `
+        <div class="card">
+          <img src="${p.image}" width="150" />
+          <h3>${p.name}</h3>
+          <p>${p.description}</p>
+          <strong>R$ ${p.price}</strong>
+        </div>
+      `;
+    });
+  });
+
 const express = require("express");
 const cors = require("cors");
 const sqlite3 = require("sqlite3").verbose();
