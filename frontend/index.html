@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR" >
+    <head>
+        <meta charset="UTF-8" />
+        <title>D Suplementos</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+
+    <body>
+
+
+        <h1> D Suplementos</h1>
+        <div id="products"></div>
+        <hr> <div id="carrinho"></div>
+
+        <script src="app.js"></script>
+<div id="auth">
+                <h2>Login</h2>
+                <input type="text" id="usuario" placeholder="Usuário">
+                 <input type="password" id="senha" placeholder="Senha">
+                  <button onclick="login()">Entrar</button>
+</div>
+
+<div id="user-info" style="display:none;">
+  <p>Bem-vindo, <span id="nomeUsuario"></span></p>
+  <button onclick="logout()">Sair</button>
+           </div>
+    </body>
+</html>
