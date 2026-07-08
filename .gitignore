@@ -3,3 +3,10 @@ node_modules
 dist
 build
 *.sqlite
+
+# Java
+out/
+*.class
+
+# macOS
+.DS_Store
