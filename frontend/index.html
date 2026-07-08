@@ -1,29 +1,78 @@
 <!DOCTYPE html>
-<html lang="pt-BR" >
-    <head>
-        <meta charset="UTF-8" />
-        <title>D Suplementos</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D.Suplementos Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#products" aria-label="D.Suplementos Store">
+        <img src="assets/products/logo.jpeg" alt="D.Suplementos" />
+        <span>D.Suplementos</span>
+      </a>
 
-    <body>
+      <nav class="header-actions" aria-label="Navegacao principal">
+        <a href="#products">Produtos</a>
+        <a href="#carrinho">Carrinho</a>
+      </nav>
+    </header>
 
+    <main>
+      <section class="hero">
+        <div class="hero-content">
+          <p class="eyebrow">Suplementos selecionados</p>
+          <h1>Performance, foco e rotina em um so lugar.</h1>
+          <p>
+            Monte seu carrinho com produtos de treino, acompanhe o total e
+            prepare a base para a futura API em Java.
+          </p>
+          <a class="hero-button" href="#products">Ver produtos</a>
+        </div>
+      </section>
 
-        <h1> D Suplementos</h1>
-        <div id="products"></div>
-        <hr> <div id="carrinho"></div>
+      <section class="store-layout" aria-label="Loja">
+        <section class="products-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Catalogo</p>
+              <h2>Produtos em destaque</h2>
+            </div>
+            <span id="product-count" class="count-pill"></span>
+          </div>
 
-        <script src="app.js"></script>
-<div id="auth">
-                <h2>Login</h2>
-                <input type="text" id="usuario" placeholder="Usuário">
-                 <input type="password" id="senha" placeholder="Senha">
-                  <button onclick="login()">Entrar</button>
-</div>
+          <div id="products" class="products-grid"></div>
+        </section>
 
-<div id="user-info" style="display:none;">
-  <p>Bem-vindo, <span id="nomeUsuario"></span></p>
-  <button onclick="logout()">Sair</button>
-           </div>
-    </body>
+        <aside class="side-panel" aria-label="Carrinho e login">
+          <section class="panel-block" id="auth">
+            <h2>Entrar</h2>
+            <label for="usuario">Usuario</label>
+            <input type="text" id="usuario" placeholder="Seu nome" />
+
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" placeholder="Sua senha" />
+
+            <button type="button" onclick="login()">Entrar</button>
+          </section>
+
+          <section class="panel-block user-card" id="user-info" hidden>
+            <p>Bem-vindo, <strong id="nomeUsuario"></strong></p>
+            <button type="button" class="secondary-button" onclick="logout()">Sair</button>
+          </section>
+
+          <section class="panel-block cart-panel" id="carrinho"></section>
+        </aside>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
 </html>
