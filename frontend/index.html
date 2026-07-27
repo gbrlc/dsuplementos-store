@@ -3,76 +3,131 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>D.Suplementos Store</title>
+    <meta name="description" content="Loja de suplementos DSuplementos Store." />
+    <title>DSuplementos Store</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href="#products" aria-label="D.Suplementos Store">
+      <a class="brand" href="index.html" aria-label="Pagina inicial DSuplementos Store">
         <img src="assets/products/logo.jpeg" alt="D.Suplementos" />
-        <span>D.Suplementos</span>
+        <span>DSuplementos</span>
       </a>
 
-      <nav class="header-actions" aria-label="Navegacao principal">
-        <a href="#products">Produtos</a>
-        <a href="#carrinho">Carrinho</a>
+      <nav class="main-nav" aria-label="Navegacao principal">
+        <a href="#catalogo">Catálogo</a>
+        <a href="#categorias">Categorias</a>
+        <a href="dashboard.html" data-dashboard-link hidden>Gestão</a>
       </nav>
+
+      <div class="header-tools">
+        <a class="header-link" data-account-link href="login.html">Entrar</a>
+        <button class="cart-trigger" type="button" data-open-cart>
+          Carrinho <span data-cart-count>0</span>
+        </button>
+      </div>
     </header>
 
     <main>
-      <section class="hero">
-        <div class="hero-content">
-          <p class="eyebrow">Suplementos selecionados</p>
-          <h1>Performance, foco e rotina em um so lugar.</h1>
-          <p>
-            Monte seu carrinho com produtos de treino, acompanhe o total e
-            prepare a base para a futura API em Java.
-          </p>
-          <a class="hero-button" href="#products">Ver produtos</a>
+      <section class="hero-home">
+        <div class="hero-copy">
+          <p class="eyebrow">Rotina em movimento</p>
+          <h1>O que sustenta o seu treino começa aqui.</h1>
+          <p>Seleção prática de suplementos para foco, força e consistência.</p>
+          <a class="button button-primary" href="#catalogo">Explorar produtos</a>
+        </div>
+        <div class="hero-product" aria-hidden="true">
+          <img src="assets/products/wheyblack.jpeg" alt="" />
         </div>
       </section>
 
-      <section class="store-layout" aria-label="Loja">
-        <section class="products-section">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Catalogo</p>
-              <h2>Produtos em destaque</h2>
-            </div>
-            <span id="product-count" class="count-pill"></span>
+      <section class="benefits" aria-label="Diferenciais da loja">
+        <article>
+          <strong>Catálogo curado</strong>
+          <span>Marcas e categorias organizadas</span>
+        </article>
+        <article>
+          <strong>Avaliações reais</strong>
+          <span>Experiências de quem usa</span>
+        </article>
+        <article>
+          <strong>Conta protegida</strong>
+          <span>Acesso autenticado pela API</span>
+        </article>
+      </section>
+
+      <section class="catalog-section" id="catalogo">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Catálogo</p>
+            <h2>Encontre o suplemento da sua rotina</h2>
           </div>
+          <p id="catalog-status" class="muted-text" aria-live="polite"></p>
+        </div>
 
-          <div id="products" class="products-grid"></div>
-        </section>
+        <div class="catalog-tools" aria-label="Filtros de produtos">
+          <label class="search-field">
+            <span>Buscar</span>
+            <input id="search-products" type="search" placeholder="Whey, creatina, vitaminas..." />
+          </label>
+          <label>
+            <span>Categoria</span>
+            <select id="category-filter">
+              <option value="">Todas</option>
+              <option value="WHEY">Whey</option>
+              <option value="CREATINA">Creatina</option>
+              <option value="PRE_TREINO">Pré-treino</option>
+              <option value="VITAMINAS">Vitaminas</option>
+              <option value="COLAGENO">Colágeno</option>
+            </select>
+          </label>
+          <label>
+            <span>Ordenar</span>
+            <select id="sort-products">
+              <option value="">Mais recentes</option>
+              <option value="preco_asc">Menor preço</option>
+              <option value="preco_desc">Maior preço</option>
+              <option value="nome">Nome</option>
+            </select>
+          </label>
+        </div>
 
-        <aside class="side-panel" aria-label="Carrinho e login">
-          <section class="panel-block" id="auth">
-            <h2>Entrar</h2>
-            <label for="usuario">Usuario</label>
-            <input type="text" id="usuario" placeholder="Seu nome" />
+        <div id="products" class="products-grid" aria-live="polite"></div>
+      </section>
 
-            <label for="senha">Senha</label>
-            <input type="password" id="senha" placeholder="Sua senha" />
-
-            <button type="button" onclick="login()">Entrar</button>
-          </section>
-
-          <section class="panel-block user-card" id="user-info" hidden>
-            <p>Bem-vindo, <strong id="nomeUsuario"></strong></p>
-            <button type="button" class="secondary-button" onclick="logout()">Sair</button>
-          </section>
-
-          <section class="panel-block cart-panel" id="carrinho"></section>
-        </aside>
+      <section class="categories-section" id="categorias">
+        <div class="section-title compact-title">
+          <div>
+            <p class="eyebrow">Por objetivo</p>
+            <h2>Categorias para começar</h2>
+          </div>
+        </div>
+        <div class="category-grid">
+          <a href="#catalogo" data-category-shortcut="WHEY"><span>Whey</span><strong>Proteína</strong></a>
+          <a href="#catalogo" data-category-shortcut="CREATINA"><span>Creatina</span><strong>Força</strong></a>
+          <a href="#catalogo" data-category-shortcut="PRE_TREINO"><span>Pré-treino</span><strong>Foco</strong></a>
+          <a href="#catalogo" data-category-shortcut="VITAMINAS"><span>Vitaminas</span><strong>Rotina</strong></a>
+        </div>
       </section>
     </main>
 
+    <footer class="site-footer">
+      <span>DSuplementos Store</span>
+      <span>Projeto de estudo em Java, Spring Boot e frontend.</span>
+    </footer>
+
+    <dialog id="cart-dialog" class="cart-dialog">
+      <div class="dialog-heading">
+        <h2>Seu carrinho</h2>
+        <button type="button" class="icon-button" data-close-cart aria-label="Fechar carrinho">×</button>
+      </div>
+      <div id="cart-content"></div>
+    </dialog>
+
+    <script src="api.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

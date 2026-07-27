@@ -1,0 +1,2 @@
+ALTER TABLE enderecos
+    ALTER COLUMN estado TYPE VARCHAR(2);

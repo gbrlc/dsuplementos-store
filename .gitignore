@@ -4,6 +4,11 @@ dist
 build
 *.sqlite
 
+# Backend Spring Boot
+backend/.env
+backend/uploads/
+backend/target/
+
 # Java
 out/
 *.class

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Produto | DSuplementos Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Pagina inicial DSuplementos Store">
+        <img src="assets/products/logo.jpeg" alt="D.Suplementos" />
+        <span>DSuplementos</span>
+      </a>
+      <nav class="main-nav" aria-label="Navegacao principal">
+        <a href="index.html#catalogo">Catálogo</a>
+        <a href="index.html#categorias">Categorias</a>
+        <a href="dashboard.html" data-dashboard-link hidden>Gestão</a>
+      </nav>
+      <div class="header-tools">
+        <a class="header-link" data-account-link href="login.html">Entrar</a>
+        <button class="cart-trigger" type="button" data-open-cart> Carrinho <span data-cart-count>0</span></button>
+      </div>
+    </header>
+
+    <main class="product-page">
+      <a class="back-link" href="index.html#catalogo">Voltar ao catálogo</a>
+      <section id="product-detail" class="product-detail" aria-live="polite">
+        <p class="muted-text">Carregando produto...</p>
+      </section>
+
+      <section class="reviews-section">
+        <div class="section-title">
+          <div>
+            <p class="eyebrow">Avaliações</p>
+            <h2>Quem usa, conta</h2>
+          </div>
+          <span id="review-count" class="data-label"></span>
+        </div>
+
+        <div id="review-login-hint" class="review-login-hint" hidden>
+          <p>Entre na sua conta para compartilhar sua experiência.</p>
+          <a class="button button-secondary" href="login.html">Entrar para avaliar</a>
+        </div>
+
+        <form id="review-form" class="review-form" hidden>
+          <div class="form-heading">
+            <h3>Deixe sua avaliação</h3>
+            <span>Uma avaliação por produto</span>
+          </div>
+          <label>
+            <span>Nota</span>
+            <select name="nota" required>
+              <option value="5">5 - Excelente</option>
+              <option value="4">4 - Muito bom</option>
+              <option value="3">3 - Bom</option>
+              <option value="2">2 - Regular</option>
+              <option value="1">1 - Ruim</option>
+            </select>
+          </label>
+          <label>
+            <span>Comentário</span>
+            <textarea name="comentario" rows="5" maxlength="1000" placeholder="Como foi sua experiência com este produto?" required></textarea>
+          </label>
+          <label>
+            <span>Fotos (opcional, até 4)</span>
+            <input name="fotos" type="file" accept="image/png,image/jpeg,image/webp" multiple />
+          </label>
+          <button class="button button-primary" type="submit">Publicar avaliação</button>
+        </form>
+
+        <div id="reviews-list" class="reviews-list"></div>
+      </section>
+    </main>
+
+    <dialog id="cart-dialog" class="cart-dialog">
+      <div class="dialog-heading">
+        <h2>Seu carrinho</h2>
+        <button type="button" class="icon-button" data-close-cart aria-label="Fechar carrinho">×</button>
+      </div>
+      <div id="cart-content"></div>
+    </dialog>
+
+    <script src="api.js"></script>
+    <script src="produto.js"></script>
+  </body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestão de estoque | DSuplementos Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="dashboard-page">
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Pagina inicial DSuplementos Store">
+        <img src="assets/products/logo.jpeg" alt="D.Suplementos" />
+        <span>DSuplementos</span>
+      </a>
+      <nav class="main-nav" aria-label="Navegacao de gestão">
+        <a href="index.html">Ver loja</a>
+        <a href="conta.html">Minha conta</a>
+      </nav>
+      <button class="header-link button-link" data-logout type="button">Sair</button>
+    </header>
+
+    <main class="dashboard-layout">
+      <section class="dashboard-top">
+        <div>
+          <p class="eyebrow">Área de gestão</p>
+          <h1>Estoque e catálogo</h1>
+          <p id="dashboard-user" class="muted-text"></p>
+        </div>
+        <button class="button button-primary" type="button" data-new-product>Novo produto</button>
+      </section>
+
+      <section class="metrics-grid" aria-label="Resumo do inventário">
+        <article><span>Produtos</span><strong id="metric-products">--</strong></article>
+        <article><span>Unidades em estoque</span><strong id="metric-stock">--</strong></article>
+        <article><span>Estoque baixo</span><strong id="metric-low-stock">--</strong></article>
+        <article><span>Produtos ativos</span><strong id="metric-active">--</strong></article>
+      </section>
+
+      <section class="inventory-section">
+        <div class="inventory-toolbar">
+          <div>
+            <p class="eyebrow">Inventário</p>
+            <h2>Produtos cadastrados</h2>
+          </div>
+          <label class="search-field compact-search">
+            <span>Buscar</span>
+            <input id="inventory-search" type="search" placeholder="Nome ou marca" />
+          </label>
+        </div>
+        <div class="table-wrap">
+          <table class="inventory-table">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Preço</th>
+                <th>Estoque</th>
+                <th>Status</th>
+                <th aria-label="Ações"></th>
+              </tr>
+            </thead>
+            <tbody id="inventory-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="product-dialog" class="product-dialog">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">Catálogo</p>
+          <h2 id="product-dialog-title">Novo produto</h2>
+        </div>
+        <button type="button" class="icon-button" data-close-product-dialog aria-label="Fechar">×</button>
+      </div>
+      <form id="product-form" class="product-form">
+        <div class="form-grid">
+          <label class="form-full">
+            <span>Nome</span>
+            <input name="nome" required maxlength="150" />
+          </label>
+          <label>
+            <span>Categoria</span>
+            <select name="categoria" required>
+              <option value="WHEY">Whey</option>
+              <option value="CREATINA">Creatina</option>
+              <option value="PRE_TREINO">Pré-treino</option>
+              <option value="HIPERCALORICO">Hipercalórico</option>
+              <option value="VITAMINAS">Vitaminas</option>
+              <option value="AMINOACIDOS">Aminoácidos</option>
+              <option value="TERMOGENICO">Termogênico</option>
+              <option value="ACESSORIOS">Acessórios</option>
+              <option value="COLAGENO">Colágeno</option>
+            </select>
+          </label>
+          <label>
+            <span>Marca</span>
+            <select name="marcaId" id="product-brand" required></select>
+          </label>
+          <label>
+            <span>Preço</span>
+            <input name="preco" type="number" min="0" step="0.01" required />
+          </label>
+          <label>
+            <span>Estoque</span>
+            <input name="estoque" type="number" min="0" step="1" required />
+          </label>
+          <label class="form-full">
+            <span>Imagem</span>
+            <input name="imagemUrl" placeholder="assets/products/nome-da-imagem.jpeg" />
+          </label>
+          <label class="form-full">
+            <span>Descrição</span>
+            <textarea name="descricao" rows="5" maxlength="4000" required></textarea>
+          </label>
+          <label class="checkbox-field form-full">
+            <input name="ativo" type="checkbox" checked />
+            <span>Produto ativo no catálogo</span>
+          </label>
+        </div>
+        <div id="product-form-feedback" class="form-feedback" aria-live="polite"></div>
+        <button class="button button-primary" type="submit">Salvar produto</button>
+      </form>
+    </dialog>
+
+    <script src="api.js"></script>
+    <script src="dashboard.js"></script>
+  </body>
+</html>

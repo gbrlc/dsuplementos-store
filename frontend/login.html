@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entrar | DSuplementos Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="auth-page">
+    <header class="site-header simple-header">
+      <a class="brand" href="index.html" aria-label="Pagina inicial DSuplementos Store">
+        <img src="assets/products/logo.jpeg" alt="D.Suplementos" />
+        <span>DSuplementos</span>
+      </a>
+      <a class="header-link" href="index.html">Voltar à loja</a>
+    </header>
+
+    <main class="auth-layout">
+      <section class="auth-intro">
+        <p class="eyebrow">Sua conta</p>
+        <h1>Uma experiência conectada à sua rotina.</h1>
+        <p>O cadastro e o login são processados pela API Java e protegidos por senha com hash.</p>
+      </section>
+
+      <section class="auth-box" aria-labelledby="auth-title">
+        <div class="auth-tabs" role="tablist" aria-label="Acesso à conta">
+          <button type="button" class="auth-tab active" data-auth-tab="login" role="tab" aria-selected="true">Entrar</button>
+          <button type="button" class="auth-tab" data-auth-tab="cadastro" role="tab" aria-selected="false">Criar conta</button>
+        </div>
+
+        <div id="auth-feedback" class="form-feedback" aria-live="polite"></div>
+
+        <form id="login-form" class="auth-form" novalidate>
+          <div>
+            <p class="eyebrow">Acesso</p>
+            <h2 id="auth-title">Que bom te ver de novo.</h2>
+          </div>
+          <label>
+            <span>E-mail</span>
+            <input name="email" type="email" autocomplete="email" placeholder="voce@email.com" required />
+          </label>
+          <label>
+            <span>Senha</span>
+            <input name="senha" type="password" autocomplete="current-password" placeholder="Sua senha" required />
+          </label>
+          <button class="button button-primary" type="submit">Entrar</button>
+          <p class="form-note">A conta de gestor usa este mesmo acesso e é direcionada para a área de gestão.</p>
+        </form>
+
+        <form id="cadastro-form" class="auth-form" hidden novalidate>
+          <div>
+            <p class="eyebrow">Novo por aqui?</p>
+            <h2>Crie sua conta.</h2>
+          </div>
+          <label>
+            <span>Nome</span>
+            <input name="nome" type="text" autocomplete="name" placeholder="Seu nome" required maxlength="120" />
+          </label>
+          <label>
+            <span>E-mail</span>
+            <input name="email" type="email" autocomplete="email" placeholder="voce@email.com" required />
+          </label>
+          <label>
+            <span>Senha</span>
+            <input name="senha" type="password" autocomplete="new-password" placeholder="Mínimo de 8 caracteres" required minlength="8" />
+          </label>
+          <button class="button button-primary" type="submit">Criar conta</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="api.js"></script>
+    <script src="auth.js"></script>
+  </body>
+</html>

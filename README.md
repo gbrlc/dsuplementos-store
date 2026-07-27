@@ -1,179 +1,149 @@
 # DSuplementos Store
 
-Projeto de e-commerce de suplementos desenvolvido como parte da minha evolucao em Java, frontend e backend.
+E-commerce de suplementos desenvolvido como projeto de portfolio e laboratório prático de Java, Spring Boot, banco de dados e frontend.
 
-Sou formado em **Analise e Desenvolvimento de Sistemas** e atualmente estou estudando no **Bootcamp Santander Java DIO 2026**. Este repositorio representa minha tentativa de transformar os conteudos do bootcamp em um projeto pratico de portfolio, evoluindo aos poucos de um frontend estatico para uma aplicacao completa com Java, Spring Boot, banco de dados e futuramente recursos de IA.
+Sou formado em Análise e Desenvolvimento de Sistemas e estudo no Bootcamp Santander Java DIO 2026. A proposta deste repositório é transformar cada conteúdo estudado em uma parte funcional de um sistema, evoluindo de uma aplicação Java em memória para uma API real com PostgreSQL.
 
-## Objetivo
+## O que esta versão adiciona
 
-Construir uma loja de suplementos com separacao entre frontend e backend, aplicando conceitos reais de desenvolvimento:
+- API REST em Spring Boot 3.5
+- PostgreSQL em nuvem preparado para Supabase
+- Esquema SQL versionado com Flyway
+- Cadastro e login reais com senha protegida por BCrypt
+- Token JWT para manter a sessão autenticada
+- Perfis `CLIENTE` e `ADMIN`
+- Carrinho vinculado ao usuário no banco de dados
+- Página de produto dinâmica com avaliações e fotos
+- Dashboard de inventário protegido para o gestor
 
-- Organizacao de projeto
-- Modelagem de entidades
-- Regras de negocio
-- Carrinho de compras
-- Simulacao de persistencia em memoria
-- Preparacao para futura API REST com Spring Boot
+## Arquitetura
 
-## Status
-
-Projeto em desenvolvimento.
-
-Atualmente o repositorio possui:
-
-- Frontend com HTML, CSS e JavaScript
-- Produtos renderizados na tela
-- Carrinho com `localStorage`
-- Login simples usando `localStorage`
-- Backend inicial em Java puro
-- Modelagem de produtos, marcas e categorias
-- Regras de negocio usando Collections, Streams, Optional e BigDecimal
+```text
+Browser (HTML, CSS e JavaScript)
+        |
+        | fetch com token JWT
+        v
+Spring Boot API
+        |
+        | Spring Data JPA + Flyway
+        v
+PostgreSQL no Supabase
+```
 
 ## Estrutura
 
 ```text
 dsuplementos-store
+├── database
+│   ├── README.md
+│   └── migrations
+│       └── V1__cria_estrutura_inicial.sql
 ├── frontend
-│   ├── index.html
-│   ├── style.css
+│   ├── index.html             # Home e catálogo
+│   ├── produto.html           # Uma página reutilizável por produto
+│   ├── login.html             # Login e cadastro
+│   ├── conta.html             # Perfil autenticado
+│   ├── dashboard.html         # Gestão de estoque, somente ADMIN
+│   ├── api.js                 # Comunicação com a API e sessão JWT
 │   ├── app.js
-│   └── assets
-│       └── products
-│
+│   ├── produto.js
+│   ├── auth.js
+│   ├── dashboard.js
+│   ├── conta.js
+│   ├── style.css
+│   └── assets/products
 └── backend
-    ├── README.md
+    ├── pom.xml
+    ├── .env.example
     └── src/main/java/br/com/dsuplementos
-        ├── Main.java
-        ├── model
-        ├── repository
-        ├── service
-        └── util
+        ├── DsuplementosApplication.java
+        ├── api                 # Controllers e serviços da API
+        ├── config              # Segurança, CORS e dados iniciais
+        ├── domain              # Entidades JPA e enums
+        ├── dto                 # Dados recebidos e enviados pela API
+        ├── repository          # Spring Data JPA
+        └── security            # JWT
 ```
 
-## Frontend
+O `Main.java` e as classes em memória originais continuam no backend como laboratório de Collections. A API inicia por `DsuplementosApplication.java`.
 
-O frontend representa a vitrine da loja.
+## Banco de dados
 
-Funcionalidades atuais:
+O banco escolhido é PostgreSQL no Supabase. O plano gratuito é suficiente para o estudo, tem painel para visualizar tabelas e permite, numa etapa posterior, armazenar as fotos das avaliações no Storage.
 
-- Listagem de produtos
-- Imagem, nome e preco de cada produto
-- Botao para adicionar ao carrinho
-- Carrinho salvo no navegador com `localStorage`
-- Login simples para simular usuario logado
-- Finalizacao de compra simulada
+1. Crie um projeto em [Supabase](https://supabase.com/).
+2. Copie `backend/.env.example` para `backend/.env`.
+3. Preencha `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` e `JWT_SECRET` com valores privados.
+4. Defina também os dados `APP_ADMIN_*` para criar a conta do gestor na primeira execução.
 
-Tecnologias:
-
-- HTML
-- CSS
-- JavaScript
-- LocalStorage
-
-## Backend
-
-O backend foi iniciado em Java puro para praticar a base antes da entrada completa em Spring Boot.
-
-Funcionalidades atuais:
-
-- Cadastro de produtos em memoria
-- Listagem de produtos
-- Busca por ID com `Optional`
-- Busca por categoria com `Stream`
-- Busca por faixa de preco com `BigDecimal`
-- Ordenacao por menor preco com `Comparator`
-- Carrinho com `Map<Long, Integer>`
-- Categorias sem repeticao com `Set`
-
-Conceitos aplicados:
-
-- Programacao Orientada a Objetos
-- Collections Framework
-- `List`
-- `Set`
-- `Map`
-- `Stream API`
-- `Optional`
-- `BigDecimal`
-- Separacao em camadas
-
-## Como Rodar o Frontend
-
-Abra o arquivo abaixo no navegador:
-
-```text
-frontend/index.html
-```
-
-Ou use a extensao Live Server no VS Code.
-
-## Como Rodar o Backend Java
-
-Entre na pasta do backend:
+No macOS ou Linux, dentro de `backend`:
 
 ```bash
-cd backend
+set -a
+source .env
+set +a
+mvn spring-boot:run
 ```
 
-Compile:
+O Flyway executará automaticamente `database/migrations/V1__cria_estrutura_inicial.sql`. Nunca coloque o `.env` preenchido no Git.
+
+## Rodando o frontend
+
+Em outro terminal:
 
 ```bash
-javac -d out $(find src/main/java -name "*.java")
+cd frontend
+python3 -m http.server 5500
 ```
 
-Execute:
+Abra [http://localhost:5500](http://localhost:5500). A API deve estar em `http://localhost:8080`.
 
-```bash
-java -cp out br.com.dsuplementos.Main
-```
+## Fluxos disponíveis
 
-## Relacao com Meus Estudos
+### Cliente
 
-Este projeto acompanha minha evolucao no Bootcamp Santander Java DIO 2026.
+1. Cria a conta em `login.html`.
+2. Faz login e recebe um JWT.
+3. Adiciona produtos ao carrinho, que fica associado à conta no banco.
+4. Abre `produto.html?id=1`, publica uma avaliação e pode anexar fotos.
 
-No momento, estou estudando:
+### Gestor
 
-- Collections
-- `Set`
-- `Map`
-- Wrappers
-- `BigDecimal`
-- Enums
-- `Optional`
-- Streams
-- Generics
-- Spring Boot
+1. A conta é criada a partir das variáveis `APP_ADMIN_*`, não por um botão público.
+2. Faz login pela mesma página de login.
+3. É direcionado para `dashboard.html`.
+4. Cadastra produtos, edita dados e atualiza estoque.
 
-A ideia e aplicar cada conteudo novo neste repositorio, em vez de deixar os estudos apenas em exemplos isolados.
+## Principais endpoints
 
-## Proximos Passos
+| Método | Endpoint | Acesso | Finalidade |
+| --- | --- | --- | --- |
+| `POST` | `/api/auth/cadastro` | Público | Criar conta de cliente |
+| `POST` | `/api/auth/login` | Público | Autenticar e receber JWT |
+| `GET` | `/api/auth/me` | Autenticado | Consultar conta atual |
+| `GET` | `/api/produtos` | Público | Listar catálogo |
+| `GET` | `/api/produtos/{id}` | Público | Ver produto |
+| `GET` | `/api/produtos/{id}/avaliacoes` | Público | Listar avaliações |
+| `POST` | `/api/produtos/{id}/avaliacoes` | Cliente/Admin | Criar avaliação |
+| `POST` | `/api/avaliacoes/{id}/fotos` | Dono/Admin | Enviar fotos da avaliação |
+| `GET` | `/api/carrinho` | Autenticado | Ler carrinho da conta |
+| `POST` | `/api/carrinho/itens` | Autenticado | Adicionar item |
+| `GET` | `/api/admin/produtos` | Admin | Inventário completo |
+| `POST` | `/api/admin/produtos` | Admin | Cadastrar produto |
+| `PUT` | `/api/admin/produtos/{id}` | Admin | Editar produto |
+| `PATCH` | `/api/admin/produtos/{id}/estoque` | Admin | Alterar estoque |
 
-- Melhorar a organizacao visual do frontend
-- Corrigir o carrinho para agrupar produto e quantidade
-- Criar endpoints com Spring Boot
-- Fazer o frontend consumir o backend usando `fetch`
-- Adicionar banco de dados
-- Criar cadastro real de usuarios
-- Criar fluxo de pedidos
-- Evoluir o projeto para usar IA com leitura ou interacao por voz
+## Próximos incrementos naturais
 
-## Planejamento de API
-
-Endpoints que devem ser criados futuramente:
-
-```text
-GET    /produtos
-GET    /produtos/{id}
-GET    /produtos/categoria/{categoria}
-POST   /produtos
-GET    /carrinho
-POST   /carrinho/itens
-DELETE /carrinho/itens/{produtoId}
-POST   /pedidos
-```
+- Criar checkout real e persistir `Pedido` e `ItemPedido`
+- Criar endereço de entrega e cupom
+- Mover arquivos de `backend/uploads` para Supabase Storage
+- Adicionar paginação e busca feita pelo banco
+- Cobrir os serviços com testes automatizados
+- Conectar recursos de IA e voz estudados no bootcamp
 
 ## Autor
 
 Gabriel Costa
 
-Formado em Analise e Desenvolvimento de Sistemas. Estudando Java e Spring Boot pelo Bootcamp Santander Java DIO 2026, com foco em construir projetos praticos de portfolio e evoluir para aplicacoes completas com backend, frontend, banco de dados e recursos de IA.
+Formado em Análise e Desenvolvimento de Sistemas. Estudante de Java e Spring Boot no Bootcamp Santander Java DIO 2026, com foco em construir aplicações completas e bem organizadas para portfolio.

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minha conta | DSuplementos Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Pagina inicial DSuplementos Store">
+        <img src="assets/products/logo.jpeg" alt="D.Suplementos" />
+        <span>DSuplementos</span>
+      </a>
+      <div class="header-tools">
+        <a class="header-link" href="index.html">Loja</a>
+        <button class="header-link button-link" data-logout type="button">Sair</button>
+      </div>
+    </header>
+
+    <main class="account-page">
+      <section class="account-card" id="account-content" aria-live="polite">
+        <p class="muted-text">Carregando sua conta...</p>
+      </section>
+    </main>
+
+    <script src="api.js"></script>
+    <script src="conta.js"></script>
+  </body>
+</html>

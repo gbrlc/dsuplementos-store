@@ -1,181 +1,173 @@
-const products = [
-  { id: 1, nome: "Whey Protein", preco: 119.90, imagem: "assets/products/wheyintegral.jpeg" },
-  { id: 2, nome: "Creatina", preco: 89.90, imagem: "assets/products/creatinaabsolut.jpeg" },
-  { id: 3, nome: "Bone Crusher", preco: 89.90, imagem: "assets/products/colageno2.jpeg" },
-  { id: 4, nome: "Colageno", preco: 89.90, imagem: "assets/products/colageno.jpeg" },
-  { id: 5, nome: "Creatina Black", preco: 89.90, imagem: "assets/products/creatina3.jpeg" },
-  { id: 6, nome: "Creatina Mono", preco: 89.90, imagem: "assets/products/creatina.jpeg" },
-  { id: 7, nome: "Multi", preco: 89.90, imagem: "assets/products/multi.jpeg" },
-  { id: 8, nome: "Whey Integral", preco: 89.90, imagem: "assets/products/wheyintegral.jpeg" },
-  { id: 9, nome: "Whey Max", preco: 89.90, imagem: "assets/products/wheymax.jpeg" },
-  { id: 10, nome: "Whey Zeo", preco: 89.90, imagem: "assets/products/wheyy.jpeg" },
-  { id: 11, nome: "Whey Black", preco: 79.90, imagem: "assets/products/wheyblack.jpeg" },
-  { id: 12, nome: "Colageno EPA", preco: 79.90, imagem: "assets/products/colagenoepa.jpeg" }
+const catalogoApresentacao = [
+  { id: 1, nome: "Whey Protein", categoria: "WHEY", marca: "Integralmedica", preco: 119.9, estoque: 20, imagemUrl: "assets/products/wheyintegral.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 2, nome: "Creatina", categoria: "CREATINA", marca: "Absolut Nutrition", preco: 89.9, estoque: 15, imagemUrl: "assets/products/creatinaabsolut.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 3, nome: "Bone Crusher", categoria: "COLAGENO", marca: "Dark Lab", preco: 89.9, estoque: 10, imagemUrl: "assets/products/colageno2.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 4, nome: "Colageno", categoria: "COLAGENO", marca: "Max Titanium", preco: 89.9, estoque: 12, imagemUrl: "assets/products/colageno.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 5, nome: "Creatina Black", categoria: "CREATINA", marca: "Dark Lab", preco: 89.9, estoque: 18, imagemUrl: "assets/products/creatina3.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 6, nome: "Creatina Mono", categoria: "CREATINA", marca: "Absolut Nutrition", preco: 89.9, estoque: 16, imagemUrl: "assets/products/creatina.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 7, nome: "Multi", categoria: "VITAMINAS", marca: "Integralmedica", preco: 89.9, estoque: 14, imagemUrl: "assets/products/multi.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 8, nome: "Whey Integral", categoria: "WHEY", marca: "Integralmedica", preco: 89.9, estoque: 21, imagemUrl: "assets/products/wheyintegral.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 9, nome: "Whey Max", categoria: "WHEY", marca: "Max Titanium", preco: 89.9, estoque: 17, imagemUrl: "assets/products/wheymax.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 10, nome: "Whey Zeo", categoria: "WHEY", marca: "Max Titanium", preco: 89.9, estoque: 13, imagemUrl: "assets/products/wheyy.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 11, nome: "Whey Black", categoria: "WHEY", marca: "Dark Lab", preco: 79.9, estoque: 23, imagemUrl: "assets/products/wheyblack.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 12, nome: "Colageno EPA", categoria: "COLAGENO", marca: "Max Titanium", preco: 79.9, estoque: 11, imagemUrl: "assets/products/colagenoepa.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 }
 ];
 
+let produtos = [];
+
 const productsContainer = document.getElementById("products");
-const carrinhoContainer = document.getElementById("carrinho");
-const productCount = document.getElementById("product-count");
+const searchInput = document.getElementById("search-products");
+const categoryFilter = document.getElementById("category-filter");
+const sortFilter = document.getElementById("sort-products");
+const catalogStatus = document.getElementById("catalog-status");
+const cartDialog = document.getElementById("cart-dialog");
+const cartContent = document.getElementById("cart-content");
 
-let carrinho = JSON.parse(localStorage.getItem("carrinho")) || [];
-
-function formatarMoeda(valor) {
-  return valor.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL"
-  });
+async function carregarProdutos() {
+  catalogStatus.textContent = "Carregando catálogo...";
+  try {
+    produtos = await requisicaoApi("/produtos");
+    catalogStatus.textContent = `${produtos.length} produtos disponíveis`;
+  } catch {
+    produtos = catalogoApresentacao;
+    catalogStatus.textContent = "Catálogo de apresentação";
+  }
+  renderizarProdutos();
 }
 
-function salvarCarrinho() {
-  localStorage.setItem("carrinho", JSON.stringify(carrinho));
+function produtosFiltrados() {
+  const termo = searchInput.value.trim().toLowerCase();
+  const categoria = categoryFilter.value;
+  const ordenar = sortFilter.value;
+
+  return produtos
+    .filter((produto) => !categoria || produto.categoria === categoria)
+    .filter((produto) => {
+      const texto = `${produto.nome} ${produto.marca} ${produto.categoria}`.toLowerCase();
+      return !termo || texto.includes(termo);
+    })
+    .sort((primeiro, segundo) => {
+      if (ordenar === "preco_asc") return Number(primeiro.preco) - Number(segundo.preco);
+      if (ordenar === "preco_desc") return Number(segundo.preco) - Number(primeiro.preco);
+      if (ordenar === "nome") return primeiro.nome.localeCompare(segundo.nome, "pt-BR");
+      return primeiro.id - segundo.id;
+    });
 }
 
 function renderizarProdutos() {
-  productsContainer.innerHTML = "";
-  productCount.innerText = `${products.length} produtos`;
+  const lista = produtosFiltrados();
 
-  products.forEach((product) => {
-    const card = document.createElement("article");
-    card.className = "product-card";
-
-    card.innerHTML = `
-      <div class="product-image">
-        <img src="${product.imagem}" alt="${product.nome}">
-      </div>
-      <div class="product-info">
-        <h3>${product.nome}</h3>
-        <p class="product-price">${formatarMoeda(product.preco)}</p>
-        <button type="button">Adicionar ao carrinho</button>
-      </div>
-    `;
-
-    card.querySelector("button").addEventListener("click", () => {
-      adicionarAoCarrinho(product);
-    });
-
-    productsContainer.appendChild(card);
-  });
-}
-
-function adicionarAoCarrinho(produto) {
-  const itemExistente = carrinho.find((item) => item.id === produto.id);
-
-  if (itemExistente) {
-    itemExistente.quantidade += 1;
-  } else {
-    carrinho.push({ ...produto, quantidade: 1 });
-  }
-
-  salvarCarrinho();
-  renderizarCarrinho();
-}
-
-function removerItem(id) {
-  carrinho = carrinho.filter((item) => item.id !== id);
-  salvarCarrinho();
-  renderizarCarrinho();
-}
-
-function renderizarCarrinho() {
-  carrinhoContainer.innerHTML = "<h2>Carrinho</h2>";
-
-  if (carrinho.length === 0) {
-    carrinhoContainer.innerHTML += '<p class="cart-empty">Seu carrinho esta vazio.</p>';
+  if (lista.length === 0) {
+    productsContainer.innerHTML = '<p class="empty-state">Nenhum produto encontrado para este filtro.</p>';
     return;
   }
 
-  const total = carrinho.reduce((soma, item) => {
-    return soma + item.preco * item.quantidade;
-  }, 0);
-
-  const lista = document.createElement("ul");
-  lista.className = "cart-list";
-
-  carrinho.forEach((item) => {
-    const li = document.createElement("li");
-    li.className = "cart-item";
-    li.innerHTML = `
-      <div>
-        <strong>${item.nome}</strong>
-        <span>${item.quantidade} x ${formatarMoeda(item.preco)}</span>
+  productsContainer.innerHTML = lista.map((produto) => `
+    <article class="product-card">
+      <a class="product-image" href="produto.html?id=${produto.id}">
+        <img src="${imagemUrl(produto.imagemUrl)}" alt="${escaparHtml(produto.nome)}" />
+      </a>
+      <div class="product-content">
+        <p class="product-category">${categoriaLegivel(produto.categoria)}</p>
+        <a class="product-name" href="produto.html?id=${produto.id}">${escaparHtml(produto.nome)}</a>
+        <p class="product-brand">${escaparHtml(produto.marca)}</p>
+        <div class="product-meta">
+          <strong>${formatarMoeda(produto.preco)}</strong>
+          <span>${produto.quantidadeAvaliacoes ? `${produto.mediaAvaliacoes.toFixed(1)} / 5` : "Sem avaliações"}</span>
+        </div>
+        <button class="button button-primary product-add" type="button" data-add-product="${produto.id}">Adicionar</button>
       </div>
-      <button
-        type="button"
-        class="remove-button"
-        aria-label="Remover ${item.nome}"
-        onclick="removerItem(${item.id})"
-      >
-        x
-      </button>
-    `;
+    </article>
+  `).join("");
 
-    lista.appendChild(li);
+  productsContainer.querySelectorAll("[data-add-product]").forEach((button) => {
+    button.addEventListener("click", () => adicionarAoCarrinho(Number(button.dataset.addProduct)));
   });
+}
 
-  carrinhoContainer.appendChild(lista);
-  carrinhoContainer.innerHTML += `
-    <div class="cart-total">
-      <span>Total</span>
-      <strong>${formatarMoeda(total)}</strong>
-    </div>
-    <button type="button" onclick="finalizarCompra()">Finalizar compra</button>
+async function abrirCarrinho() {
+  if (!obterSessao()?.token) {
+    cartContent.innerHTML = `
+      <div class="empty-state">
+        <p>Entre na sua conta para montar o carrinho.</p>
+        <a class="button button-primary" href="login.html">Entrar</a>
+      </div>
+    `;
+    cartDialog.showModal();
+    return;
+  }
+
+  cartContent.innerHTML = '<p class="muted-text">Carregando carrinho...</p>';
+  cartDialog.showModal();
+  try {
+    const carrinho = await requisicaoApi("/carrinho");
+    renderizarCarrinho(carrinho);
+  } catch (erro) {
+    cartContent.innerHTML = `<p class="empty-state">${escaparHtml(erro.message)}</p>`;
+  }
+}
+
+function renderizarCarrinho(carrinho) {
+  if (!carrinho.itens.length) {
+    cartContent.innerHTML = '<p class="empty-state">Seu carrinho ainda está vazio.</p>';
+    return;
+  }
+
+  cartContent.innerHTML = `
+    <ul class="cart-list">
+      ${carrinho.itens.map((item) => `
+        <li class="cart-item">
+          <img src="${imagemUrl(item.imagemUrl)}" alt="" />
+          <div>
+            <strong>${escaparHtml(item.nome)}</strong>
+            <span>${formatarMoeda(item.precoUnitario)}</span>
+          </div>
+          <div class="quantity-control">
+            <button type="button" data-change-quantity="${item.produtoId}" data-quantity="${item.quantidade - 1}" aria-label="Diminuir quantidade">−</button>
+            <span>${item.quantidade}</span>
+            <button type="button" data-change-quantity="${item.produtoId}" data-quantity="${item.quantidade + 1}" aria-label="Aumentar quantidade">+</button>
+          </div>
+        </li>
+      `).join("")}
+    </ul>
+    <div class="cart-total"><span>Total</span><strong>${formatarMoeda(carrinho.total)}</strong></div>
   `;
+
+  cartContent.querySelectorAll("[data-change-quantity]").forEach((button) => {
+    button.addEventListener("click", () => alterarQuantidadeCarrinho(
+      Number(button.dataset.changeQuantity),
+      Number(button.dataset.quantity)
+    ));
+  });
 }
 
-function login() {
-  const usuario = document.getElementById("usuario").value.trim();
-
-  if (!usuario) {
-    alert("Digite um usuario");
-    return;
-  }
-
-  localStorage.setItem("usuario", usuario);
-  atualizarUsuario();
-}
-
-function logout() {
-  localStorage.removeItem("usuario");
-  atualizarUsuario();
-}
-
-function atualizarUsuario() {
-  const usuario = localStorage.getItem("usuario");
-  const auth = document.getElementById("auth");
-  const userInfo = document.getElementById("user-info");
-  const nomeUsuario = document.getElementById("nomeUsuario");
-
-  if (usuario) {
-    auth.hidden = true;
-    userInfo.hidden = false;
-    nomeUsuario.innerText = usuario;
-  } else {
-    auth.hidden = false;
-    userInfo.hidden = true;
-    nomeUsuario.innerText = "";
+async function alterarQuantidadeCarrinho(produtoId, quantidade) {
+  try {
+    const carrinho = quantidade === 0
+      ? await requisicaoApi(`/carrinho/itens/${produtoId}`, { method: "DELETE" })
+      : await requisicaoApi(`/carrinho/itens/${produtoId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ quantidade })
+        });
+    renderizarCarrinho(carrinho);
+    await atualizarCarrinho();
+  } catch (erro) {
+    mostrarToast(erro.message, "erro");
   }
 }
 
-function finalizarCompra() {
-  const usuario = localStorage.getItem("usuario");
+searchInput.addEventListener("input", renderizarProdutos);
+categoryFilter.addEventListener("change", renderizarProdutos);
+sortFilter.addEventListener("change", renderizarProdutos);
 
-  if (!usuario) {
-    alert("Faça login para finalizar a compra");
-    return;
-  }
+document.querySelectorAll("[data-category-shortcut]").forEach((shortcut) => {
+  shortcut.addEventListener("click", () => {
+    categoryFilter.value = shortcut.dataset.categoryShortcut;
+    renderizarProdutos();
+  });
+});
 
-  if (carrinho.length === 0) {
-    alert("Carrinho vazio");
-    return;
-  }
+document.querySelector("[data-open-cart]").addEventListener("click", abrirCarrinho);
+document.querySelector("[data-close-cart]").addEventListener("click", () => cartDialog.close());
 
-  alert("Compra realizada com sucesso!");
-
-  carrinho = [];
-  localStorage.removeItem("carrinho");
-  renderizarCarrinho();
-}
-
-renderizarProdutos();
-renderizarCarrinho();
-atualizarUsuario();
+carregarProdutos();
