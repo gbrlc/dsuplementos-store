@@ -15,3 +15,5 @@ out/
 
 # macOS
 .DS_Store
+backend/erro-api.txt
+backend/erro.txt
