@@ -8,6 +8,7 @@ import br.com.dsuplementos.dto.produto.MarcaResponse;
 import br.com.dsuplementos.dto.produto.ProdutoRequest;
 import br.com.dsuplementos.dto.produto.ProdutoResponse;
 import br.com.dsuplementos.exception.RecursoNaoEncontradoException;
+import br.com.dsuplementos.mapper.ProdutoMapper;
 import br.com.dsuplementos.repository.AvaliacaoRepository;
 import br.com.dsuplementos.repository.MarcaRepository;
 import br.com.dsuplementos.repository.ProdutoJpaRepository;
@@ -25,15 +26,18 @@ public class ProdutoService {
     private final ProdutoJpaRepository produtoRepository;
     private final MarcaRepository marcaRepository;
     private final AvaliacaoRepository avaliacaoRepository;
+    private final ProdutoMapper produtoMapper;
 
     public ProdutoService(
             ProdutoJpaRepository produtoRepository,
             MarcaRepository marcaRepository,
-            AvaliacaoRepository avaliacaoRepository
+            AvaliacaoRepository avaliacaoRepository,
+            ProdutoMapper produtoMapper
     ) {
         this.produtoRepository = produtoRepository;
         this.marcaRepository = marcaRepository;
         this.avaliacaoRepository = avaliacaoRepository;
+        this.produtoMapper = produtoMapper;
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +66,7 @@ public class ProdutoService {
     public List<MarcaResponse> listarMarcas() {
         return marcaRepository.findAll().stream()
                 .sorted(Comparator.comparing(Marca::getNome, String.CASE_INSENSITIVE_ORDER))
-                .map(marca -> new MarcaResponse(marca.getId(), marca.getNome()))
+                .map(produtoMapper::toResponse)
                 .toList();
     }
 
@@ -128,20 +132,8 @@ public class ProdutoService {
                 .average()
                 .orElse(0.0);
 
-        return new ProdutoResponse(
-                produto.getId(),
-                produto.getNome(),
-                produto.getCategoria(),
-                produto.getMarca().getId(),
-                produto.getMarca().getNome(),
-                produto.getPreco(),
-                produto.getEstoque(),
-                produto.getDescricao(),
-                produto.getImagemUrl(),
-                produto.isAtivo(),
-                BigDecimal.valueOf(media).setScale(1, RoundingMode.HALF_UP).doubleValue(),
-                avaliacoes.size()
-        );
+        double mediaArredondada = BigDecimal.valueOf(media).setScale(1, RoundingMode.HALF_UP).doubleValue();
+        return produtoMapper.toResponse(produto, mediaArredondada, avaliacoes.size());
     }
 
     private List<Produto> ordenar(List<Produto> produtos, String ordenar) {

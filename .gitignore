@@ -8,6 +8,7 @@ build
 backend/.env
 backend/uploads/
 backend/target/
+backend/erro*.txt
 
 # Java
 out/

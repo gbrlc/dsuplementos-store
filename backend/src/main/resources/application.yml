@@ -1,6 +1,11 @@
 spring:
   application:
     name: dsuplementos-api
+  profiles:
+    default: dev
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -42,3 +47,8 @@ app:
     password: ${APP_ADMIN_PASSWORD:}
   seed-catalog:
     enabled: ${APP_SEED_CATALOG:true}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha

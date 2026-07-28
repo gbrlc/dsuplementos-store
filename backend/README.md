@@ -17,6 +17,7 @@ Service    -> aplica regras de negócio
 Repository -> conversa com PostgreSQL pelo Spring Data JPA
 Entity     -> representa as tabelas do banco
 DTO        -> define o contrato da API
+Mapper     -> transforma Entity em DTO com MapStruct
 ```
 
 ## Segurança
@@ -43,6 +44,36 @@ mvn spring-boot:run
 ```
 
 Você precisa ter Java 21 ou superior e Maven instalados. O computador atual já possui Maven e Java 26, que executam o projeto configurado para Java 21.
+
+### Perfis de execucao
+
+- `dev`: perfil padrao. Mostra as consultas SQL e mantem o catalogo inicial habilitado.
+- `prod`: desabilita o catalogo de exemplo, nao mostra SQL e bloqueia a pagina Swagger por padrao.
+
+Defina o perfil no `.env`:
+
+```env
+SPRING_PROFILES_ACTIVE=dev
+```
+
+Para subir como producao, use `SPRING_PROFILES_ACTIVE=prod` e as variaveis reais de banco e JWT no ambiente de deploy.
+
+## Documentacao da API
+
+Com a API rodando no perfil `dev`, abra [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html).
+
+O Swagger gera a documentacao a partir dos controllers e DTOs, e possui o botao `Authorize` para testar rotas protegidas com o JWT recebido no login. A especificacao em JSON fica em [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs).
+
+As falhas agora seguem o mesmo formato, preservando a mensagem que o frontend ja utiliza:
+
+```json
+{
+  "status": 401,
+  "codigo": "AUTENTICACAO_NECESSARIA",
+  "mensagem": "Autenticacao necessaria ou expirada.",
+  "caminho": "/api/carrinho"
+}
+```
 
 ## Banco e migrations
 
