@@ -24,11 +24,13 @@ Mapper     -> transforma Entity em DTO com MapStruct
 
 1. No cadastro, a senha é transformada em hash BCrypt.
 2. No login, a API compara a senha enviada com o hash salvo no PostgreSQL.
-3. Se estiver correta, a API envia um JWT.
+3. Se estiver correta, a API envia um JWT e um refresh token.
 4. O frontend manda o JWT no header `Authorization: Bearer <token>`.
 5. O Spring Security permite ou bloqueia a rota conforme o perfil do usuário.
 
 O acesso usa dois tokens: o `token` JWT, usado nas chamadas da API, e um `refreshToken` opaco. Apenas o hash do refresh token e salvo no banco. A renovacao rotaciona o token anterior, e o logout o revoga no servidor.
+
+Ao trocar a senha, a API revoga todos os refresh tokens ativos da conta. O navegador encerra a sessão local e pede um novo login com a senha atualizada.
 
 O frontend não decide quem pode usar o dashboard. Mesmo que alguém tente chamar a URL diretamente, o backend responde `403` sem o perfil `ADMIN`.
 
@@ -98,3 +100,10 @@ O catálogo inicial é carregado automaticamente no primeiro início. Para criar
 | `POST` | `/api/auth/login` | Autentica e entrega access token e refresh token |
 | `POST` | `/api/auth/refresh` | Rotaciona um refresh token valido e entrega uma nova sessao |
 | `POST` | `/api/auth/logout` | Revoga o refresh token informado |
+| `GET` | `/api/usuarios/me` | Retorna o perfil da conta autenticada |
+| `PUT` | `/api/usuarios/me` | Atualiza o nome da conta autenticada |
+| `PATCH` | `/api/usuarios/me/senha` | Troca a senha e revoga sessões renováveis |
+| `GET` | `/api/usuarios/me/enderecos` | Lista os endereços da própria conta |
+| `POST` | `/api/usuarios/me/enderecos` | Cria um endereço de entrega |
+| `PUT` | `/api/usuarios/me/enderecos/{id}` | Atualiza um endereço da própria conta |
+| `DELETE` | `/api/usuarios/me/enderecos/{id}` | Exclui um endereço da própria conta |

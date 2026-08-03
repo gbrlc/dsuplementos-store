@@ -1017,31 +1017,36 @@ textarea:focus {
 }
 
 .account-page {
-  display: grid;
-  place-items: center;
   min-height: calc(100vh - 76px);
+  padding-top: 48px;
+  padding-bottom: 88px;
 }
 
 .account-card {
-  width: min(540px, 100%);
+  width: 100%;
 }
 
-.account-card h1 {
-  margin-bottom: 28px;
-  font-size: 2.7rem;
+.account-summary {
+  padding-bottom: 34px;
+  border-bottom: 1px solid var(--line);
+}
+
+.account-summary h1 {
+  margin-bottom: 20px;
+  font-size: 3rem;
 }
 
 .account-details {
-  display: grid;
-  gap: 16px;
-  margin: 0 0 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin: 0 0 24px;
 }
 
 .account-details div {
   display: grid;
   gap: 2px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--line);
+  min-width: 220px;
 }
 
 .account-details dt {
@@ -1053,6 +1058,100 @@ textarea:focus {
 .account-details dd {
   margin: 0;
   font-weight: 700;
+}
+
+.account-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding-top: 32px;
+}
+
+.account-panel {
+  padding: 24px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.account-addresses {
+  grid-column: 1 / -1;
+}
+
+.panel-heading,
+.form-actions,
+.address-row,
+.address-title,
+.address-actions {
+  display: flex;
+  align-items: center;
+}
+
+.panel-heading {
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.panel-heading h2 {
+  margin-bottom: 0;
+  font-size: 1.45rem;
+}
+
+.panel-heading .eyebrow {
+  margin-bottom: 4px;
+}
+
+.account-form {
+  display: grid;
+  gap: 16px;
+}
+
+.form-actions {
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.form-actions .form-feedback {
+  flex: 1 1 180px;
+  margin: 0;
+}
+
+.address-list {
+  display: grid;
+  margin-bottom: 28px;
+  border-top: 1px solid var(--line);
+}
+
+.address-row {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.address-row p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.address-title {
+  gap: 8px;
+}
+
+.address-actions {
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.danger-action {
+  color: var(--danger);
+}
+
+.address-form {
+  max-width: 880px;
 }
 
 .dashboard-layout {
@@ -1370,6 +1469,10 @@ textarea:focus {
     flex-direction: column;
   }
 
+  .account-layout {
+    grid-template-columns: 1fr;
+  }
+
   .dashboard-top .button {
     width: 100%;
   }
@@ -1475,8 +1578,16 @@ textarea:focus {
   }
 
   .auth-box,
-  .account-card {
+  .account-panel {
     padding: 22px;
+  }
+
+  .account-summary h1 {
+    font-size: 2.55rem;
+  }
+
+  .address-row {
+    flex-direction: column;
   }
 
   .site-footer {

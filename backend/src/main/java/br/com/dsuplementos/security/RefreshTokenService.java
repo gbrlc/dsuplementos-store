@@ -60,6 +60,11 @@ public class RefreshTokenService {
                 .ifPresent(RefreshToken::revogar);
     }
 
+    @Transactional
+    public void revogarTodosDoUsuario(Long usuarioId) {
+        refreshTokenRepository.revogarAtivosPorUsuarioId(usuarioId, Instant.now());
+    }
+
     private RefreshToken buscarValido(String tokenPuro) {
         if (tokenPuro == null || tokenPuro.isBlank()) {
             throw sessaoInvalida();

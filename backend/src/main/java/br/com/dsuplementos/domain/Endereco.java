@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
@@ -44,11 +45,106 @@ public class Endereco {
     @Column(name = "criado_em", nullable = false, updatable = false)
     private Instant criadoEm;
 
+    @Column(name = "atualizado_em", nullable = false)
+    private Instant atualizadoEm;
+
     protected Endereco() {
     }
 
     @PrePersist
     void criarData() {
-        criadoEm = Instant.now();
+        Instant agora = Instant.now();
+        criadoEm = agora;
+        atualizadoEm = agora;
+    }
+
+    @PreUpdate
+    void atualizarData() {
+        atualizadoEm = Instant.now();
+    }
+
+    public Endereco(
+            Usuario usuario,
+            String apelido,
+            String cep,
+            String logradouro,
+            String numero,
+            String complemento,
+            String bairro,
+            String cidade,
+            String estado,
+            boolean principal
+    ) {
+        this.usuario = usuario;
+        atualizar(apelido, cep, logradouro, numero, complemento, bairro, cidade, estado);
+        this.principal = principal;
+    }
+
+    public void atualizar(
+            String apelido,
+            String cep,
+            String logradouro,
+            String numero,
+            String complemento,
+            String bairro,
+            String cidade,
+            String estado
+    ) {
+        this.apelido = apelido;
+        this.cep = cep;
+        this.logradouro = logradouro;
+        this.numero = numero;
+        this.complemento = complemento;
+        this.bairro = bairro;
+        this.cidade = cidade;
+        this.estado = estado;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public String getApelido() {
+        return apelido;
+    }
+
+    public String getCep() {
+        return cep;
+    }
+
+    public String getLogradouro() {
+        return logradouro;
+    }
+
+    public String getNumero() {
+        return numero;
+    }
+
+    public String getComplemento() {
+        return complemento;
+    }
+
+    public String getBairro() {
+        return bairro;
+    }
+
+    public String getCidade() {
+        return cidade;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public boolean isPrincipal() {
+        return principal;
+    }
+
+    public void setPrincipal(boolean principal) {
+        this.principal = principal;
     }
 }

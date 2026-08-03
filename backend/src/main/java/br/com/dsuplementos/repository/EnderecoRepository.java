@@ -1,0 +1,16 @@
+package br.com.dsuplementos.repository;
+
+import br.com.dsuplementos.domain.Endereco;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+import java.util.Optional;
+
+public interface EnderecoRepository extends JpaRepository<Endereco, Long> {
+
+    List<Endereco> findByUsuarioIdOrderByPrincipalDescIdDesc(Long usuarioId);
+
+    Optional<Endereco> findByIdAndUsuarioId(Long enderecoId, Long usuarioId);
+
+    long countByUsuarioId(Long usuarioId);
+}

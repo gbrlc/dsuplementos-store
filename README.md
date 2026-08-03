@@ -10,8 +10,9 @@ Sou formado em Análise e Desenvolvimento de Sistemas e estudo no Bootcamp Santa
 - PostgreSQL em nuvem preparado para Supabase
 - Esquema SQL versionado com Flyway
 - Cadastro e login reais com senha protegida por BCrypt
-- Token JWT para manter a sessão autenticada
+- Sessão com JWT, refresh token rotativo e logout revogável
 - Perfis `CLIENTE` e `ADMIN`
+- Perfil do cliente, troca de senha e endereços de entrega persistidos
 - Carrinho vinculado ao usuário no banco de dados
 - Página de produto dinâmica com avaliações e fotos
 - Dashboard de inventário protegido para o gestor
@@ -85,7 +86,7 @@ set +a
 mvn spring-boot:run
 ```
 
-O Flyway executará automaticamente `database/migrations/V1__cria_estrutura_inicial.sql`. Nunca coloque o `.env` preenchido no Git.
+O Flyway executará automaticamente todas as migrations em `database/migrations`, na ordem da versão. Nunca coloque o `.env` preenchido no Git.
 
 ## Rodando o frontend
 
@@ -103,9 +104,10 @@ Abra [http://localhost:5500](http://localhost:5500). A API deve estar em `http:/
 ### Cliente
 
 1. Cria a conta em `login.html`.
-2. Faz login e recebe um JWT.
-3. Adiciona produtos ao carrinho, que fica associado à conta no banco.
-4. Abre `produto.html?id=1`, publica uma avaliação e pode anexar fotos.
+2. Faz login e recebe um access token e refresh token.
+3. Atualiza nome, senha e endereços em `conta.html`.
+4. Adiciona produtos ao carrinho, que fica associado à conta no banco.
+5. Abre `produto.html?id=1`, publica uma avaliação e pode anexar fotos.
 
 ### Gestor
 
@@ -119,8 +121,16 @@ Abra [http://localhost:5500](http://localhost:5500). A API deve estar em `http:/
 | Método | Endpoint | Acesso | Finalidade |
 | --- | --- | --- | --- |
 | `POST` | `/api/auth/cadastro` | Público | Criar conta de cliente |
-| `POST` | `/api/auth/login` | Público | Autenticar e receber JWT |
-| `GET` | `/api/auth/me` | Autenticado | Consultar conta atual |
+| `POST` | `/api/auth/login` | Público | Autenticar e receber uma sessão |
+| `POST` | `/api/auth/refresh` | Público | Rotacionar refresh token e renovar a sessão |
+| `POST` | `/api/auth/logout` | Público | Revogar um refresh token |
+| `GET` | `/api/usuarios/me` | Autenticado | Consultar perfil da própria conta |
+| `PUT` | `/api/usuarios/me` | Autenticado | Atualizar o próprio nome |
+| `PATCH` | `/api/usuarios/me/senha` | Autenticado | Trocar senha e revogar sessões renováveis |
+| `GET` | `/api/usuarios/me/enderecos` | Autenticado | Listar os próprios endereços |
+| `POST` | `/api/usuarios/me/enderecos` | Autenticado | Criar endereço de entrega |
+| `PUT` | `/api/usuarios/me/enderecos/{id}` | Dono | Atualizar o próprio endereço |
+| `DELETE` | `/api/usuarios/me/enderecos/{id}` | Dono | Excluir o próprio endereço |
 | `GET` | `/api/produtos` | Público | Listar catálogo |
 | `GET` | `/api/produtos/{id}` | Público | Ver produto |
 | `GET` | `/api/produtos/{id}/avaliacoes` | Público | Listar avaliações |
@@ -136,10 +146,10 @@ Abra [http://localhost:5500](http://localhost:5500). A API deve estar em `http:/
 ## Próximos incrementos naturais
 
 - Criar checkout real e persistir `Pedido` e `ItemPedido`
-- Criar endereço de entrega e cupom
+- Aplicar cupom e simular frete no checkout
 - Mover arquivos de `backend/uploads` para Supabase Storage
 - Adicionar paginação e busca feita pelo banco
-- Cobrir os serviços com testes automatizados
+- Aumentar a cobertura com testes de integração
 - Conectar recursos de IA e voz estudados no bootcamp
 
 ## Autor
