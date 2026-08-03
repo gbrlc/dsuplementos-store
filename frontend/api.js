@@ -1,6 +1,7 @@
 const API_BASE_URL = window.DSUPLEMENTOS_API_URL || "http://localhost:8080/api";
 const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, "");
 const SESSION_KEY = "dsuplementos.session";
+let renovacaoEmAndamento = null;
 
 function formatarMoeda(valor) {
   return Number(valor || 0).toLocaleString("pt-BR", {
@@ -47,19 +48,20 @@ function encerrarSessao() {
 }
 
 async function requisicaoApi(caminho, opcoes = {}) {
-  const headers = new Headers(opcoes.headers || {});
+  const { tentarRenovar = true, ...opcoesFetch } = opcoes;
+  const headers = new Headers(opcoesFetch.headers || {});
   const sessao = obterSessao();
 
   if (sessao?.token) {
     headers.set("Authorization", `Bearer ${sessao.token}`);
   }
-  if (opcoes.body && !(opcoes.body instanceof FormData) && !headers.has("Content-Type")) {
+  if (opcoesFetch.body && !(opcoesFetch.body instanceof FormData) && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
   let response;
   try {
-    response = await fetch(`${API_BASE_URL}${caminho}`, { ...opcoes, headers });
+    response = await fetch(`${API_BASE_URL}${caminho}`, { ...opcoesFetch, headers });
   } catch {
     throw new Error("Nao foi possivel conectar com a API. Inicie o backend e confira a configuracao.");
   }
@@ -68,6 +70,9 @@ async function requisicaoApi(caminho, opcoes = {}) {
   const body = contentType.includes("application/json") ? await response.json() : null;
 
   if (!response.ok) {
+    if (response.status === 401 && tentarRenovar && caminho !== "/auth/refresh" && await renovarSessao()) {
+      return requisicaoApi(caminho, { ...opcoesFetch, tentarRenovar: false });
+    }
     if (response.status === 401) {
       encerrarSessao();
     }
@@ -75,6 +80,56 @@ async function requisicaoApi(caminho, opcoes = {}) {
   }
 
   return body;
+}
+
+async function renovarSessao() {
+  if (!renovacaoEmAndamento) {
+    renovacaoEmAndamento = renovarSessaoInterna().finally(() => {
+      renovacaoEmAndamento = null;
+    });
+  }
+  return renovacaoEmAndamento;
+}
+
+async function renovarSessaoInterna() {
+  const sessao = obterSessao();
+  if (!sessao?.refreshToken) {
+    return false;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken: sessao.refreshToken })
+    });
+    if (!response.ok) {
+      encerrarSessao();
+      return false;
+    }
+    salvarSessao(await response.json());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function encerrarSessaoNoServidor() {
+  const refreshToken = obterSessao()?.refreshToken;
+  encerrarSessao();
+  if (!refreshToken) {
+    return;
+  }
+
+  try {
+    await fetch(`${API_BASE_URL}/auth/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken })
+    });
+  } catch {
+    // O navegador ja encerrou a sessao local mesmo se a API estiver indisponivel.
+  }
 }
 
 function atualizarCabecalho() {
@@ -157,8 +212,8 @@ document.addEventListener("DOMContentLoaded", () => {
   atualizarCabecalho();
   atualizarCarrinho();
 
-  document.querySelector("[data-logout]")?.addEventListener("click", () => {
-    encerrarSessao();
+  document.querySelector("[data-logout]")?.addEventListener("click", async () => {
+    await encerrarSessaoNoServidor();
     window.location.href = "index.html";
   });
 });

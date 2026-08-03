@@ -5,11 +5,13 @@ import br.com.dsuplementos.domain.enums.Role;
 import br.com.dsuplementos.dto.auth.AuthResponse;
 import br.com.dsuplementos.dto.auth.CadastroRequest;
 import br.com.dsuplementos.dto.auth.LoginRequest;
+import br.com.dsuplementos.dto.auth.RefreshTokenRequest;
 import br.com.dsuplementos.dto.auth.UsuarioResponse;
 import br.com.dsuplementos.exception.RegraDeNegocioException;
 import br.com.dsuplementos.exception.RecursoNaoEncontradoException;
 import br.com.dsuplementos.repository.UsuarioRepository;
 import br.com.dsuplementos.security.JwtService;
+import br.com.dsuplementos.security.RefreshTokenService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,15 +24,18 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     public AuthService(
             UsuarioRepository usuarioRepository,
             PasswordEncoder passwordEncoder,
-            JwtService jwtService
+            JwtService jwtService,
+            RefreshTokenService refreshTokenService
     ) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @Transactional
@@ -47,10 +52,10 @@ public class AuthService {
                 Role.CLIENTE
         );
         usuarioRepository.save(usuario);
-        return autenticar(usuario);
+        return criarSessao(usuario);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         Usuario usuario = usuarioRepository.findByEmailIgnoreCase(normalizarEmail(request.email()))
                 .orElseThrow(() -> new RegraDeNegocioException("E-mail ou senha invalidos."));
@@ -59,7 +64,18 @@ public class AuthService {
             throw new RegraDeNegocioException("E-mail ou senha invalidos.");
         }
 
-        return autenticar(usuario);
+        return criarSessao(usuario);
+    }
+
+    @Transactional
+    public AuthResponse renovar(RefreshTokenRequest request) {
+        Usuario usuario = refreshTokenService.renovar(request.refreshToken());
+        return criarSessao(usuario);
+    }
+
+    @Transactional
+    public void logout(RefreshTokenRequest request) {
+        refreshTokenService.revogar(request.refreshToken());
     }
 
     @Transactional(readOnly = true)
@@ -73,8 +89,12 @@ public class AuthService {
         return new UsuarioResponse(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getRole());
     }
 
-    private AuthResponse autenticar(Usuario usuario) {
-        return new AuthResponse(jwtService.gerarToken(usuario), paraResponse(usuario));
+    private AuthResponse criarSessao(Usuario usuario) {
+        return new AuthResponse(
+                jwtService.gerarToken(usuario),
+                refreshTokenService.emitir(usuario),
+                paraResponse(usuario)
+        );
     }
 
     private String normalizarEmail(String email) {

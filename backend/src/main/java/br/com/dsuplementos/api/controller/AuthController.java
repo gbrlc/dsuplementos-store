@@ -5,6 +5,7 @@ import br.com.dsuplementos.domain.Usuario;
 import br.com.dsuplementos.dto.auth.AuthResponse;
 import br.com.dsuplementos.dto.auth.CadastroRequest;
 import br.com.dsuplementos.dto.auth.LoginRequest;
+import br.com.dsuplementos.dto.auth.RefreshTokenRequest;
 import br.com.dsuplementos.dto.auth.UsuarioResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -34,6 +35,17 @@ public class AuthController {
     @PostMapping("/login")
     public AuthResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/refresh")
+    public AuthResponse renovar(@Valid @RequestBody RefreshTokenRequest request) {
+        return authService.renovar(request);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshTokenRequest request) {
+        authService.logout(request);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")

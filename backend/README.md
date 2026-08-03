@@ -28,6 +28,8 @@ Mapper     -> transforma Entity em DTO com MapStruct
 4. O frontend manda o JWT no header `Authorization: Bearer <token>`.
 5. O Spring Security permite ou bloqueia a rota conforme o perfil do usuário.
 
+O acesso usa dois tokens: o `token` JWT, usado nas chamadas da API, e um `refreshToken` opaco. Apenas o hash do refresh token e salvo no banco. A renovacao rotaciona o token anterior, e o logout o revoga no servidor.
+
 O frontend não decide quem pode usar o dashboard. Mesmo que alguém tente chamar a URL diretamente, o backend responde `403` sem o perfil `ADMIN`.
 
 ## Configuração
@@ -88,3 +90,11 @@ curl http://localhost:8080/api/produtos
 ```
 
 O catálogo inicial é carregado automaticamente no primeiro início. Para criar o administrador, mantenha `APP_ADMIN_ENABLED=true` e preencha as três variáveis `APP_ADMIN_*` antes de iniciar.
+
+## Sessao
+
+| Metodo | Rota | Finalidade |
+| --- | --- | --- |
+| `POST` | `/api/auth/login` | Autentica e entrega access token e refresh token |
+| `POST` | `/api/auth/refresh` | Rotaciona um refresh token valido e entrega uma nova sessao |
+| `POST` | `/api/auth/logout` | Revoga o refresh token informado |
