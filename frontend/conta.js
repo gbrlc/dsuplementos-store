@@ -28,7 +28,10 @@ function renderizarConta(usuario) {
         <div><dt>E-mail</dt><dd>${escaparHtml(usuario.email)}</dd></div>
         <div><dt>Perfil</dt><dd>${perfil}</dd></div>
       </dl>
-      ${usuario.role === "ADMIN" ? '<a class="button button-secondary" href="dashboard.html">Abrir gestão</a>' : '<a class="button button-secondary" href="index.html#catalogo">Voltar ao catálogo</a>'}
+      <div class="account-shortcuts">
+        ${usuario.role === "ADMIN" ? '<a class="button button-secondary" href="dashboard.html">Abrir gestão</a>' : '<a class="button button-secondary" href="index.html#catalogo">Voltar ao catálogo</a>'}
+        <a class="button button-secondary" href="pedidos.html">Meus pedidos</a>
+      </div>
     </section>
 
     <div class="account-layout">

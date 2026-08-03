@@ -83,6 +83,8 @@ As falhas agora seguem o mesmo formato, preservando a mensagem que o frontend ja
 
 O Flyway lê a migration em `../database/migrations` durante o build e cria as tabelas quando a aplicação inicia. A configuração `ddl-auto: validate` diz ao Hibernate para conferir se as entities Java correspondem ao SQL, sem deixar que ele invente alterações no banco.
 
+Pedidos armazenam uma cópia do endereço de entrega e cada `ItemPedido` armazena o nome e o preço unitário daquele instante. Essa decisão preserva o histórico: uma alteração posterior de endereço ou preço não modifica uma compra já realizada.
+
 ## Teste rápido da API
 
 Depois de iniciar a aplicação:
@@ -107,3 +109,8 @@ O catálogo inicial é carregado automaticamente no primeiro início. Para criar
 | `POST` | `/api/usuarios/me/enderecos` | Cria um endereço de entrega |
 | `PUT` | `/api/usuarios/me/enderecos/{id}` | Atualiza um endereço da própria conta |
 | `DELETE` | `/api/usuarios/me/enderecos/{id}` | Exclui um endereço da própria conta |
+| `GET` | `/api/pedidos/simulacao-frete` | Simula frete a partir dos itens no carrinho |
+| `POST` | `/api/pedidos` | Cria pedido, reserva estoque e limpa o carrinho |
+| `GET` | `/api/pedidos` | Lista pedidos da conta autenticada |
+| `POST` | `/api/pedidos/{id}/pagamento-simulado` | Muda pedido criado para pago |
+| `POST` | `/api/pedidos/{id}/cancelamento` | Cancela pedido permitido e recompõe o estoque |

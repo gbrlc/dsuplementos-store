@@ -131,6 +131,7 @@ function renderizarCarrinho(carrinho) {
       `).join("")}
     </ul>
     <div class="cart-total"><span>Total</span><strong>${formatarMoeda(carrinho.total)}</strong></div>
+    <a class="button button-primary checkout-link" href="checkout.html">Ir para checkout</a>
   `;
 
   cartContent.querySelectorAll("[data-change-quantity]").forEach((button) => {

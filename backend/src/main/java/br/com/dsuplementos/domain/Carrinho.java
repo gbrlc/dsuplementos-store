@@ -66,6 +66,10 @@ public class Carrinho {
         itens.remove(item);
     }
 
+    public void limparItens() {
+        itens.clear();
+    }
+
     public Long getId() {
         return id;
     }

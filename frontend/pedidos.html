@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meus pedidos | DSuplementos Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Pagina inicial DSuplementos Store">
+        <img src="assets/products/logo.jpeg" alt="D.Suplementos" />
+        <span>DSuplementos</span>
+      </a>
+      <nav class="main-nav" aria-label="Navegacao de pedidos">
+        <a href="index.html">Loja</a>
+        <a href="checkout.html">Checkout</a>
+      </nav>
+      <div class="header-tools">
+        <a class="header-link" data-account-link href="conta.html">Minha conta</a>
+        <button class="header-link button-link" data-logout type="button">Sair</button>
+      </div>
+    </header>
+
+    <main class="orders-page">
+      <section class="orders-heading">
+        <p class="eyebrow">Minha conta</p>
+        <h1>Meus pedidos</h1>
+        <p class="muted-text">Acompanhe as compras realizadas nesta conta.</p>
+      </section>
+      <section id="orders-list" class="orders-list" aria-live="polite">
+        <p class="muted-text">Carregando pedidos...</p>
+      </section>
+    </main>
+
+    <script src="api.js"></script>
+    <script src="pedidos.js"></script>
+  </body>
+</html>

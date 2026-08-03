@@ -36,4 +36,37 @@ public class ItemPedido {
 
     protected ItemPedido() {
     }
+
+    public ItemPedido(Pedido pedido, Produto produto, int quantidade) {
+        this.pedido = pedido;
+        this.produto = produto;
+        this.nomeProduto = produto.getNome();
+        this.precoUnitario = produto.getPreco();
+        this.quantidade = quantidade;
+        this.subtotal = precoUnitario.multiply(BigDecimal.valueOf(quantidade));
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Produto getProduto() {
+        return produto;
+    }
+
+    public String getNomeProduto() {
+        return nomeProduto;
+    }
+
+    public BigDecimal getPrecoUnitario() {
+        return precoUnitario;
+    }
+
+    public int getQuantidade() {
+        return quantidade;
+    }
+
+    public BigDecimal getSubtotal() {
+        return subtotal;
+    }
 }

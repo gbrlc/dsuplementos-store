@@ -675,6 +675,11 @@ textarea:focus {
   font-size: 1.35rem;
 }
 
+.checkout-link {
+  width: 100%;
+  margin-top: 18px;
+}
+
 .empty-state {
   margin: 0;
   padding: 28px 0;
@@ -1036,6 +1041,12 @@ textarea:focus {
   font-size: 3rem;
 }
 
+.account-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .account-details {
   display: flex;
   flex-wrap: wrap;
@@ -1152,6 +1163,195 @@ textarea:focus {
 
 .address-form {
   max-width: 880px;
+}
+
+.checkout-page,
+.orders-page {
+  width: min(1120px, calc(100% - 48px));
+  min-height: calc(100vh - 76px);
+  padding-top: 48px;
+  padding-bottom: 88px;
+  margin: 0 auto;
+}
+
+.checkout-heading,
+.orders-heading {
+  margin-bottom: 32px;
+}
+
+.checkout-heading h1,
+.orders-heading h1 {
+  max-width: 650px;
+  margin-bottom: 8px;
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.checkout-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
+  align-items: start;
+}
+
+.checkout-main {
+  display: grid;
+  gap: 16px;
+}
+
+.checkout-block,
+.checkout-summary,
+.order-row,
+.checkout-success {
+  padding: 24px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.checkout-block h2,
+.checkout-summary h2 {
+  margin-bottom: 0;
+  font-size: 1.45rem;
+}
+
+.checkout-empty {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+}
+
+.checkout-empty .muted-text {
+  margin-bottom: 0;
+}
+
+.checkout-items {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkout-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.checkout-items small {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.checkout-summary {
+  position: sticky;
+  top: 96px;
+}
+
+.summary-values {
+  display: grid;
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.summary-values div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.summary-values dt {
+  color: var(--muted);
+}
+
+.summary-values dd {
+  margin: 0;
+  font-weight: 700;
+}
+
+.summary-values .summary-total {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--forest-dark);
+  font-size: 1.2rem;
+}
+
+.checkout-summary .button {
+  width: 100%;
+}
+
+.checkout-success {
+  width: min(620px, 100%);
+}
+
+.checkout-success h1 {
+  font-size: 2.35rem;
+}
+
+.orders-list {
+  display: grid;
+  gap: 16px;
+}
+
+.order-header,
+.order-content,
+.order-actions {
+  display: flex;
+}
+
+.order-header {
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.order-header h2 {
+  margin-bottom: 0;
+  font-size: 1.25rem;
+}
+
+.order-header .eyebrow {
+  margin-bottom: 4px;
+}
+
+.order-content {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr auto;
+  gap: 20px;
+  padding: 18px 0;
+}
+
+.order-content p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.order-total {
+  text-align: right;
+}
+
+.order-total span {
+  display: block;
+  margin-top: 3px;
+  color: var(--forest-dark);
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.order-actions {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.status-badge.pending {
+  color: #74420f;
+  background: #fff0cf;
 }
 
 .dashboard-layout {
@@ -1473,6 +1673,14 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .checkout-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-summary {
+    position: static;
+  }
+
   .dashboard-top .button {
     width: 100%;
   }
@@ -1544,6 +1752,11 @@ textarea:focus {
     width: min(100% - 32px, 1280px);
   }
 
+  .checkout-page,
+  .orders-page {
+    width: min(100% - 32px, 1120px);
+  }
+
   .section-title,
   .inventory-toolbar,
   .review-login-hint {
@@ -1588,6 +1801,19 @@ textarea:focus {
 
   .address-row {
     flex-direction: column;
+  }
+
+  .checkout-heading h1,
+  .orders-heading h1 {
+    font-size: 2.55rem;
+  }
+
+  .order-content {
+    grid-template-columns: 1fr;
+  }
+
+  .order-total {
+    text-align: left;
   }
 
   .site-footer {

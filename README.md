@@ -14,6 +14,7 @@ Sou formado em Análise e Desenvolvimento de Sistemas e estudo no Bootcamp Santa
 - Perfis `CLIENTE` e `ADMIN`
 - Perfil do cliente, troca de senha e endereços de entrega persistidos
 - Carrinho vinculado ao usuário no banco de dados
+- Checkout com frete simulado, reserva de estoque e histórico de pedidos
 - Página de produto dinâmica com avaliações e fotos
 - Dashboard de inventário protegido para o gestor
 
@@ -44,6 +45,8 @@ dsuplementos-store
 │   ├── produto.html           # Uma página reutilizável por produto
 │   ├── login.html             # Login e cadastro
 │   ├── conta.html             # Perfil autenticado
+│   ├── checkout.html          # Confirmação de entrega e pedido
+│   ├── pedidos.html           # Histórico e status dos pedidos
 │   ├── dashboard.html         # Gestão de estoque, somente ADMIN
 │   ├── api.js                 # Comunicação com a API e sessão JWT
 │   ├── app.js
@@ -107,7 +110,9 @@ Abra [http://localhost:5500](http://localhost:5500). A API deve estar em `http:/
 2. Faz login e recebe um access token e refresh token.
 3. Atualiza nome, senha e endereços em `conta.html`.
 4. Adiciona produtos ao carrinho, que fica associado à conta no banco.
-5. Abre `produto.html?id=1`, publica uma avaliação e pode anexar fotos.
+5. Define a entrega e cria o pedido pelo checkout. O produto e o endereço ficam registrados como uma cópia histórica da compra.
+6. Acompanha o pedido, simula o pagamento e pode cancelá-lo enquanto ele ainda não foi separado.
+7. Abre `produto.html?id=1`, publica uma avaliação e pode anexar fotos.
 
 ### Gestor
 
@@ -138,6 +143,11 @@ Abra [http://localhost:5500](http://localhost:5500). A API deve estar em `http:/
 | `POST` | `/api/avaliacoes/{id}/fotos` | Dono/Admin | Enviar fotos da avaliação |
 | `GET` | `/api/carrinho` | Autenticado | Ler carrinho da conta |
 | `POST` | `/api/carrinho/itens` | Autenticado | Adicionar item |
+| `GET` | `/api/pedidos/simulacao-frete` | Autenticado | Calcular frete a partir do carrinho |
+| `POST` | `/api/pedidos` | Autenticado | Criar pedido e reservar estoque |
+| `GET` | `/api/pedidos` | Autenticado | Listar histórico da própria conta |
+| `POST` | `/api/pedidos/{id}/pagamento-simulado` | Dono | Simular confirmação de pagamento |
+| `POST` | `/api/pedidos/{id}/cancelamento` | Dono | Cancelar e devolver itens ao estoque |
 | `GET` | `/api/admin/produtos` | Admin | Inventário completo |
 | `POST` | `/api/admin/produtos` | Admin | Cadastrar produto |
 | `PUT` | `/api/admin/produtos/{id}` | Admin | Editar produto |
@@ -145,7 +155,6 @@ Abra [http://localhost:5500](http://localhost:5500). A API deve estar em `http:/
 
 ## Próximos incrementos naturais
 
-- Criar checkout real e persistir `Pedido` e `ItemPedido`
 - Aplicar cupom e simular frete no checkout
 - Mover arquivos de `backend/uploads` para Supabase Storage
 - Adicionar paginação e busca feita pelo banco
