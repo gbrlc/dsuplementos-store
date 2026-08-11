@@ -125,7 +125,7 @@ public class ProdutoService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Marca nao encontrada."));
     }
 
-    private ProdutoResponse paraResponse(Produto produto) {
+    public ProdutoResponse paraResponse(Produto produto) {
         List<Avaliacao> avaliacoes = avaliacaoRepository.findByProdutoIdOrderByCriadoEmDesc(produto.getId());
         double media = avaliacoes.stream()
                 .mapToInt(Avaliacao::getNota)

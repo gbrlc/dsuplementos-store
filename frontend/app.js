@@ -14,6 +14,7 @@ const catalogoApresentacao = [
 ];
 
 let produtos = [];
+let favoritosIds = new Set();
 
 const productsContainer = document.getElementById("products");
 const searchInput = document.getElementById("search-products");
@@ -27,12 +28,27 @@ async function carregarProdutos() {
   catalogStatus.textContent = "Carregando catálogo...";
   try {
     produtos = await requisicaoApi("/produtos");
+    await carregarFavoritos();
     catalogStatus.textContent = `${produtos.length} produtos disponíveis`;
   } catch {
     produtos = catalogoApresentacao;
     catalogStatus.textContent = "Catálogo de apresentação";
   }
   renderizarProdutos();
+}
+
+async function carregarFavoritos() {
+  if (!obterSessao()?.token) {
+    favoritosIds = new Set();
+    return;
+  }
+
+  try {
+    const favoritos = await requisicaoApi("/favoritos");
+    favoritosIds = new Set(favoritos.map((produto) => produto.id));
+  } catch {
+    favoritosIds = new Set();
+  }
 }
 
 function produtosFiltrados() {
@@ -67,6 +83,7 @@ function renderizarProdutos() {
       <a class="product-image" href="produto.html?id=${produto.id}">
         <img src="${imagemUrl(produto.imagemUrl)}" alt="${escaparHtml(produto.nome)}" />
       </a>
+      <button class="favorite-button ${favoritosIds.has(produto.id) ? "is-favorite" : ""}" type="button" data-favorite-product="${produto.id}" aria-pressed="${favoritosIds.has(produto.id)}" aria-label="${favoritosIds.has(produto.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}" title="${favoritosIds.has(produto.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}">♥</button>
       <div class="product-content">
         <p class="product-category">${categoriaLegivel(produto.categoria)}</p>
         <a class="product-name" href="produto.html?id=${produto.id}">${escaparHtml(produto.nome)}</a>
@@ -83,6 +100,30 @@ function renderizarProdutos() {
   productsContainer.querySelectorAll("[data-add-product]").forEach((button) => {
     button.addEventListener("click", () => adicionarAoCarrinho(Number(button.dataset.addProduct)));
   });
+  productsContainer.querySelectorAll("[data-favorite-product]").forEach((button) => {
+    button.addEventListener("click", () => alterarFavorito(Number(button.dataset.favoriteProduct)));
+  });
+}
+
+async function alterarFavorito(produtoId) {
+  if (!obterSessao()?.token) {
+    window.location.href = `login.html?redirect=${encodeURIComponent(window.location.pathname.split("/").pop() || "index.html")}`;
+    return;
+  }
+
+  const jaFavorito = favoritosIds.has(produtoId);
+  try {
+    await requisicaoApi(`/favoritos/${produtoId}`, { method: jaFavorito ? "DELETE" : "POST" });
+    if (jaFavorito) {
+      favoritosIds.delete(produtoId);
+    } else {
+      favoritosIds.add(produtoId);
+    }
+    renderizarProdutos();
+    mostrarToast(jaFavorito ? "Produto removido dos favoritos." : "Produto salvo nos favoritos.");
+  } catch (erro) {
+    mostrarToast(erro.message, "erro");
+  }
 }
 
 async function abrirCarrinho() {

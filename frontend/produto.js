@@ -6,6 +6,8 @@ const reviewCount = document.getElementById("review-count");
 const cartDialog = document.getElementById("cart-dialog");
 const cartContent = document.getElementById("cart-content");
 const productId = Number(new URLSearchParams(window.location.search).get("id"));
+let produtoAtual = null;
+let produtoFavorito = false;
 
 async function carregarPaginaProduto() {
   if (!Number.isInteger(productId) || productId <= 0) {
@@ -14,10 +16,13 @@ async function carregarPaginaProduto() {
   }
 
   try {
-    const [produto, avaliacoes] = await Promise.all([
+    const [produto, avaliacoes, favorito] = await Promise.all([
       requisicaoApi(`/produtos/${productId}`),
-      requisicaoApi(`/produtos/${productId}/avaliacoes`)
+      requisicaoApi(`/produtos/${productId}/avaliacoes`),
+      obterSessao()?.token ? requisicaoApi(`/favoritos/${productId}`) : Promise.resolve({ favorito: false })
     ]);
+    produtoAtual = produto;
+    produtoFavorito = favorito.favorito;
     renderizarProduto(produto);
     renderizarAvaliacoes(avaliacoes);
     configurarFormularioAvaliacao();
@@ -36,6 +41,7 @@ function renderizarProduto(produto) {
       <p class="eyebrow">${categoriaLegivel(produto.categoria)}</p>
       <p class="detail-brand">${escaparHtml(produto.marca)}</p>
       <h1>${escaparHtml(produto.nome)}</h1>
+      <button class="favorite-button detail-favorite ${produtoFavorito ? "is-favorite" : ""}" type="button" aria-pressed="${produtoFavorito}" aria-label="${produtoFavorito ? "Remover dos favoritos" : "Adicionar aos favoritos"}" title="${produtoFavorito ? "Remover dos favoritos" : "Adicionar aos favoritos"}">♥</button>
       <div class="rating-summary">
         <strong>${produto.quantidadeAvaliacoes ? produto.mediaAvaliacoes.toFixed(1) : "Novo"}</strong>
         <span>${produto.quantidadeAvaliacoes ? `${produto.quantidadeAvaliacoes} avaliações` : "Ainda sem avaliações"}</span>
@@ -50,6 +56,23 @@ function renderizarProduto(produto) {
   `;
 
   productDetail.querySelector(".detail-add")?.addEventListener("click", () => adicionarAoCarrinho(produto.id));
+  productDetail.querySelector(".detail-favorite")?.addEventListener("click", alterarFavoritoDaPagina);
+}
+
+async function alterarFavoritoDaPagina() {
+  if (!obterSessao()?.token) {
+    window.location.href = `login.html?redirect=${encodeURIComponent(`produto.html?id=${productId}`)}`;
+    return;
+  }
+
+  try {
+    await requisicaoApi(`/favoritos/${productId}`, { method: produtoFavorito ? "DELETE" : "POST" });
+    produtoFavorito = !produtoFavorito;
+    renderizarProduto(produtoAtual);
+    mostrarToast(produtoFavorito ? "Produto salvo nos favoritos." : "Produto removido dos favoritos.");
+  } catch (erro) {
+    mostrarToast(erro.message, "erro");
+  }
 }
 
 function renderizarAvaliacoes(avaliacoes) {
@@ -147,6 +170,7 @@ async function abrirCarrinho() {
         ${carrinho.itens.map((item) => `<li class="cart-item"><img src="${imagemUrl(item.imagemUrl)}" alt="" /><div><strong>${escaparHtml(item.nome)}</strong><span>${item.quantidade} x ${formatarMoeda(item.precoUnitario)}</span></div></li>`).join("")}
       </ul>
       <div class="cart-total"><span>Total</span><strong>${formatarMoeda(carrinho.total)}</strong></div>
+      <a class="button button-primary checkout-link" href="checkout.html">Ir para checkout</a>
     `;
   } catch (erro) {
     cartContent.innerHTML = `<p class="empty-state">${escaparHtml(erro.message)}</p>`;

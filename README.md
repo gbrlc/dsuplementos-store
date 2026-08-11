@@ -15,6 +15,7 @@ Sou formado em Análise e Desenvolvimento de Sistemas e estudo no Bootcamp Santa
 - Perfil do cliente, troca de senha e endereços de entrega persistidos
 - Carrinho vinculado ao usuário no banco de dados
 - Checkout com frete simulado, reserva de estoque e histórico de pedidos
+- Produtos favoritos persistidos por conta
 - Página de produto dinâmica com avaliações e fotos
 - Dashboard de inventário protegido para o gestor
 
@@ -47,6 +48,7 @@ dsuplementos-store
 │   ├── conta.html             # Perfil autenticado
 │   ├── checkout.html          # Confirmação de entrega e pedido
 │   ├── pedidos.html           # Histórico e status dos pedidos
+│   ├── favoritos.html         # Produtos salvos pelo cliente
 │   ├── dashboard.html         # Gestão de estoque, somente ADMIN
 │   ├── api.js                 # Comunicação com a API e sessão JWT
 │   ├── app.js
@@ -112,7 +114,8 @@ Abra [http://localhost:5500](http://localhost:5500). A API deve estar em `http:/
 4. Adiciona produtos ao carrinho, que fica associado à conta no banco.
 5. Define a entrega e cria o pedido pelo checkout. O produto e o endereço ficam registrados como uma cópia histórica da compra.
 6. Acompanha o pedido, simula o pagamento e pode cancelá-lo enquanto ele ainda não foi separado.
-7. Abre `produto.html?id=1`, publica uma avaliação e pode anexar fotos.
+7. Salva ou remove produtos da lista de favoritos.
+8. Abre `produto.html?id=1`, publica uma avaliação e pode anexar fotos.
 
 ### Gestor
 
@@ -143,6 +146,10 @@ Abra [http://localhost:5500](http://localhost:5500). A API deve estar em `http:/
 | `POST` | `/api/avaliacoes/{id}/fotos` | Dono/Admin | Enviar fotos da avaliação |
 | `GET` | `/api/carrinho` | Autenticado | Ler carrinho da conta |
 | `POST` | `/api/carrinho/itens` | Autenticado | Adicionar item |
+| `GET` | `/api/favoritos` | Autenticado | Listar produtos favoritos da conta |
+| `GET` | `/api/favoritos/{produtoId}` | Autenticado | Consultar se um produto está salvo |
+| `POST` | `/api/favoritos/{produtoId}` | Autenticado | Salvar produto nos favoritos |
+| `DELETE` | `/api/favoritos/{produtoId}` | Autenticado | Remover produto dos favoritos |
 | `GET` | `/api/pedidos/simulacao-frete` | Autenticado | Calcular frete a partir do carrinho |
 | `POST` | `/api/pedidos` | Autenticado | Criar pedido e reservar estoque |
 | `GET` | `/api/pedidos` | Autenticado | Listar histórico da própria conta |

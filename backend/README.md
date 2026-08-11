@@ -109,6 +109,10 @@ O catálogo inicial é carregado automaticamente no primeiro início. Para criar
 | `POST` | `/api/usuarios/me/enderecos` | Cria um endereço de entrega |
 | `PUT` | `/api/usuarios/me/enderecos/{id}` | Atualiza um endereço da própria conta |
 | `DELETE` | `/api/usuarios/me/enderecos/{id}` | Exclui um endereço da própria conta |
+| `GET` | `/api/favoritos` | Lista produtos favoritos da conta autenticada |
+| `GET` | `/api/favoritos/{produtoId}` | Informa se o produto foi favoritado pela conta |
+| `POST` | `/api/favoritos/{produtoId}` | Salva produto nos favoritos |
+| `DELETE` | `/api/favoritos/{produtoId}` | Remove produto dos favoritos |
 | `GET` | `/api/pedidos/simulacao-frete` | Simula frete a partir dos itens no carrinho |
 | `POST` | `/api/pedidos` | Cria pedido, reserva estoque e limpa o carrinho |
 | `GET` | `/api/pedidos` | Lista pedidos da conta autenticada |

@@ -30,6 +30,7 @@ function renderizarConta(usuario) {
       </dl>
       <div class="account-shortcuts">
         ${usuario.role === "ADMIN" ? '<a class="button button-secondary" href="dashboard.html">Abrir gestão</a>' : '<a class="button button-secondary" href="index.html#catalogo">Voltar ao catálogo</a>'}
+        <a class="button button-secondary" href="favoritos.html">Favoritos</a>
         <a class="button button-secondary" href="pedidos.html">Meus pedidos</a>
       </div>
     </section>

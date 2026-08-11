@@ -18,3 +18,4 @@ out/
 .DS_Store
 backend/erro-api.txt
 backend/erro.txt
+backend/.idea/

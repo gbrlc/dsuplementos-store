@@ -136,6 +136,7 @@ function atualizarCabecalho() {
   const sessao = obterSessao();
   const accountLink = document.querySelector("[data-account-link]");
   const dashboardLink = document.querySelector("[data-dashboard-link]");
+  const favoritesLink = document.querySelector("[data-favorites-link]");
   const logoutButton = document.querySelector("[data-logout]");
 
   if (accountLink) {
@@ -144,6 +145,9 @@ function atualizarCabecalho() {
   }
   if (dashboardLink) {
     dashboardLink.hidden = sessao?.usuario?.role !== "ADMIN";
+  }
+  if (favoritesLink) {
+    favoritesLink.hidden = !sessao?.usuario;
   }
   if (logoutButton) {
     logoutButton.hidden = !sessao?.usuario;
