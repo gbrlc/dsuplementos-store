@@ -65,7 +65,7 @@ function renderizarInventario() {
     <tr>
       <td>
         <div class="inventory-product">
-          <img src="${imagemUrl(produto.imagemUrl)}" alt="" />
+          <img src="${imagemUrl(produto.imagemUrl)}" alt="" width="426" height="640" loading="lazy" decoding="async" />
           <div><strong>${escaparHtml(produto.nome)}</strong><span>${escaparHtml(produto.marca)}</span></div>
         </div>
       </td>

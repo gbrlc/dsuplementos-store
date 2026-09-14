@@ -15,27 +15,36 @@ async function carregarPaginaProduto() {
     return;
   }
 
-  try {
-    const [produto, avaliacoes, favorito] = await Promise.all([
-      requisicaoApi(`/produtos/${productId}`),
-      requisicaoApi(`/produtos/${productId}/avaliacoes`),
-      obterSessao()?.token ? requisicaoApi(`/favoritos/${productId}`) : Promise.resolve({ favorito: false })
-    ]);
-    produtoAtual = produto;
-    produtoFavorito = favorito.favorito;
-    renderizarProduto(produto);
-    renderizarAvaliacoes(avaliacoes);
-    configurarFormularioAvaliacao();
-  } catch (erro) {
-    productDetail.innerHTML = `<p class="empty-state">${escaparHtml(erro.message)}</p>`;
+  const produtoApresentacao = window.CATALOGO_APRESENTACAO.find((produto) => produto.id === productId);
+  if (produtoApresentacao) {
+    produtoAtual = produtoApresentacao;
+    produtoFavorito = false;
+    renderizarProduto(produtoApresentacao);
+    renderizarAvaliacoes([]);
   }
+  configurarFormularioAvaliacao();
+
+  const [resultadoProduto, avaliacoes, favorito] = await Promise.all([
+    requisicaoApi(`/produtos/${productId}`, { timeoutMs: 4000 }).catch(() => null),
+    requisicaoApi(`/produtos/${productId}/avaliacoes`, { timeoutMs: 4000 }).catch(() => []),
+    obterSessao()?.token ? requisicaoApi(`/favoritos/${productId}`, { timeoutMs: 4000 }).catch(() => ({ favorito: false })) : Promise.resolve({ favorito: false })
+  ]);
+
+  if (resultadoProduto) {
+    produtoAtual = resultadoProduto;
+    produtoFavorito = favorito.favorito;
+    renderizarProduto(resultadoProduto);
+  } else if (!produtoApresentacao) {
+    productDetail.innerHTML = '<p class="empty-state">Produto não encontrado.</p>';
+  }
+  renderizarAvaliacoes(avaliacoes);
 }
 
 function renderizarProduto(produto) {
   document.title = `${produto.nome} | DSuplementos Store`;
   productDetail.innerHTML = `
     <div class="product-detail-image">
-      <img src="${imagemUrl(produto.imagemUrl)}" alt="${escaparHtml(produto.nome)}" />
+      <img src="${imagemUrl(produto.imagemUrl)}" alt="${escaparHtml(produto.nome)}" width="426" height="640" decoding="async" />
     </div>
     <div class="product-detail-info">
       <p class="eyebrow">${categoriaLegivel(produto.categoria)}</p>
@@ -95,7 +104,7 @@ function renderizarAvaliacoes(avaliacoes) {
       <p>${escaparHtml(avaliacao.comentario)}</p>
       ${avaliacao.fotos.length ? `
         <div class="review-photos">
-          ${avaliacao.fotos.map((foto) => `<a href="${imagemUrl(foto.url)}" target="_blank" rel="noreferrer"><img src="${imagemUrl(foto.url)}" alt="Foto da avaliação de ${escaparHtml(avaliacao.usuario)}" /></a>`).join("")}
+          ${avaliacao.fotos.map((foto) => `<a href="${imagemUrl(foto.url)}" target="_blank" rel="noreferrer"><img src="${imagemUrl(foto.url)}" alt="Foto da avaliação de ${escaparHtml(avaliacao.usuario)}" loading="lazy" decoding="async" /></a>`).join("")}
         </div>
       ` : ""}
     </article>
@@ -167,7 +176,7 @@ async function abrirCarrinho() {
     }
     cartContent.innerHTML = `
       <ul class="cart-list">
-        ${carrinho.itens.map((item) => `<li class="cart-item"><img src="${imagemUrl(item.imagemUrl)}" alt="" /><div><strong>${escaparHtml(item.nome)}</strong><span>${item.quantidade} x ${formatarMoeda(item.precoUnitario)}</span></div></li>`).join("")}
+        ${carrinho.itens.map((item) => `<li class="cart-item"><img src="${imagemUrl(item.imagemUrl)}" alt="" width="426" height="640" loading="lazy" decoding="async" /><div><strong>${escaparHtml(item.nome)}</strong><span>${item.quantidade} x ${formatarMoeda(item.precoUnitario)}</span></div></li>`).join("")}
       </ul>
       <div class="cart-total"><span>Total</span><strong>${formatarMoeda(carrinho.total)}</strong></div>
       <a class="button button-primary checkout-link" href="checkout.html">Ir para checkout</a>

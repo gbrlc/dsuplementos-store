@@ -1,18 +1,3 @@
-const catalogoApresentacao = [
-  { id: 1, nome: "Whey Protein", categoria: "WHEY", marca: "Integralmedica", preco: 119.9, estoque: 20, imagemUrl: "assets/products/wheyintegral.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
-  { id: 2, nome: "Creatina", categoria: "CREATINA", marca: "Absolut Nutrition", preco: 89.9, estoque: 15, imagemUrl: "assets/products/creatinaabsolut.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
-  { id: 3, nome: "Bone Crusher", categoria: "COLAGENO", marca: "Dark Lab", preco: 89.9, estoque: 10, imagemUrl: "assets/products/colageno2.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
-  { id: 4, nome: "Colageno", categoria: "COLAGENO", marca: "Max Titanium", preco: 89.9, estoque: 12, imagemUrl: "assets/products/colageno.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
-  { id: 5, nome: "Creatina Black", categoria: "CREATINA", marca: "Dark Lab", preco: 89.9, estoque: 18, imagemUrl: "assets/products/creatina3.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
-  { id: 6, nome: "Creatina Mono", categoria: "CREATINA", marca: "Absolut Nutrition", preco: 89.9, estoque: 16, imagemUrl: "assets/products/creatina.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
-  { id: 7, nome: "Multi", categoria: "VITAMINAS", marca: "Integralmedica", preco: 89.9, estoque: 14, imagemUrl: "assets/products/multi.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
-  { id: 8, nome: "Whey Integral", categoria: "WHEY", marca: "Integralmedica", preco: 89.9, estoque: 21, imagemUrl: "assets/products/wheyintegral.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
-  { id: 9, nome: "Whey Max", categoria: "WHEY", marca: "Max Titanium", preco: 89.9, estoque: 17, imagemUrl: "assets/products/wheymax.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
-  { id: 10, nome: "Whey Zeo", categoria: "WHEY", marca: "Max Titanium", preco: 89.9, estoque: 13, imagemUrl: "assets/products/wheyy.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
-  { id: 11, nome: "Whey Black", categoria: "WHEY", marca: "Dark Lab", preco: 79.9, estoque: 23, imagemUrl: "assets/products/wheyblack.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
-  { id: 12, nome: "Colageno EPA", categoria: "COLAGENO", marca: "Max Titanium", preco: 79.9, estoque: 11, imagemUrl: "assets/products/colagenoepa.jpeg", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 }
-];
-
 let produtos = [];
 let favoritosIds = new Set();
 
@@ -25,16 +10,22 @@ const cartDialog = document.getElementById("cart-dialog");
 const cartContent = document.getElementById("cart-content");
 
 async function carregarProdutos() {
-  catalogStatus.textContent = "Carregando catálogo...";
-  try {
-    produtos = await requisicaoApi("/produtos");
-    await carregarFavoritos();
-    catalogStatus.textContent = `${produtos.length} produtos disponíveis`;
-  } catch {
-    produtos = catalogoApresentacao;
-    catalogStatus.textContent = "Catálogo de apresentação";
-  }
+  produtos = window.CATALOGO_APRESENTACAO;
+  catalogStatus.textContent = "Catálogo de apresentação";
   renderizarProdutos();
+  const favoritosPromise = carregarFavoritos();
+
+  try {
+    const produtosDaApi = await requisicaoApi("/produtos", { timeoutMs: 4000 });
+    const temProdutosDaApi = Array.isArray(produtosDaApi) && produtosDaApi.length > 0;
+    produtos = temProdutosDaApi ? produtosDaApi : window.CATALOGO_APRESENTACAO;
+    catalogStatus.textContent = temProdutosDaApi ? `${produtos.length} produtos disponíveis` : "Catálogo de apresentação";
+    renderizarProdutos();
+  } catch {
+    // O catálogo de apresentação já está visível e a API pode ser retomada depois.
+  }
+
+  favoritosPromise.then(renderizarProdutos);
 }
 
 async function carregarFavoritos() {
@@ -44,7 +35,7 @@ async function carregarFavoritos() {
   }
 
   try {
-    const favoritos = await requisicaoApi("/favoritos");
+    const favoritos = await requisicaoApi("/favoritos", { timeoutMs: 4000 });
     favoritosIds = new Set(favoritos.map((produto) => produto.id));
   } catch {
     favoritosIds = new Set();
@@ -81,7 +72,7 @@ function renderizarProdutos() {
   productsContainer.innerHTML = lista.map((produto) => `
     <article class="product-card">
       <a class="product-image" href="produto.html?id=${produto.id}">
-        <img src="${imagemUrl(produto.imagemUrl)}" alt="${escaparHtml(produto.nome)}" />
+        <img src="${imagemUrl(produto.imagemUrl)}" alt="${escaparHtml(produto.nome)}" width="426" height="640" loading="lazy" decoding="async" />
       </a>
       <button class="favorite-button ${favoritosIds.has(produto.id) ? "is-favorite" : ""}" type="button" data-favorite-product="${produto.id}" aria-pressed="${favoritosIds.has(produto.id)}" aria-label="${favoritosIds.has(produto.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}" title="${favoritosIds.has(produto.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}">♥</button>
       <div class="product-content">
@@ -158,7 +149,7 @@ function renderizarCarrinho(carrinho) {
     <ul class="cart-list">
       ${carrinho.itens.map((item) => `
         <li class="cart-item">
-          <img src="${imagemUrl(item.imagemUrl)}" alt="" />
+          <img src="${imagemUrl(item.imagemUrl)}" alt="" width="426" height="640" loading="lazy" decoding="async" />
           <div>
             <strong>${escaparHtml(item.nome)}</strong>
             <span>${formatarMoeda(item.precoUnitario)}</span>

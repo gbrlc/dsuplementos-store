@@ -23,7 +23,7 @@ function renderizarFavoritos(produtos) {
   favoritesGrid.innerHTML = produtos.map((produto) => `
     <article class="product-card">
       <a class="product-image" href="produto.html?id=${produto.id}">
-        <img src="${imagemUrl(produto.imagemUrl)}" alt="${escaparHtml(produto.nome)}" />
+        <img src="${imagemUrl(produto.imagemUrl)}" alt="${escaparHtml(produto.nome)}" width="426" height="640" loading="lazy" decoding="async" />
       </a>
       <button class="favorite-button is-favorite" type="button" data-remove-favorite="${produto.id}" aria-label="Remover dos favoritos" title="Remover dos favoritos">♥</button>
       <div class="product-content">
