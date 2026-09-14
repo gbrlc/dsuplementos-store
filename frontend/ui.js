@@ -1,4 +1,30 @@
 const DSuplementosUI = (() => {
+  const headerLinks = {
+    store: `<a href="index.html#catalogo">Catálogo</a><a href="index.html#categorias">Objetivos</a><a href="favoritos.html" data-favorites-link hidden>Favoritos</a><a href="dashboard.html" data-dashboard-link hidden>Gestão</a>`,
+    account: `<a href="index.html#catalogo">Loja</a><a href="favoritos.html">Favoritos</a><a href="pedidos.html">Pedidos</a>`,
+    admin: `<a href="index.html">Ver loja</a><a href="conta.html">Minha conta</a>`
+  };
+
+  function brand() {
+    return `<a class="brand" href="index.html" aria-label="Página inicial DSuplementos Store"><img src="assets/products/logo.jpeg" alt="" width="256" height="256" decoding="async" /><span>DSuplementos</span></a>`;
+  }
+
+  function mountHeader() {
+    const header = document.querySelector("[data-site-header]");
+    if (!header) return;
+
+    const mode = header.dataset.headerMode || "store";
+    if (mode === "simple") {
+      header.innerHTML = `${brand()}<a class="header-link" href="index.html">Voltar à loja</a>`;
+      return;
+    }
+
+    const storeActions = `<a class="header-link" data-account-link href="login.html">Entrar</a><button class="cart-trigger" type="button" data-open-cart><span class="cart-trigger__label">Carrinho</span><span data-cart-count>0</span></button>`;
+    const accountActions = `<a class="header-link" data-account-link href="conta.html">Minha conta</a><button class="header-link button-link" data-logout type="button">Sair</button>`;
+
+    header.innerHTML = `${brand()}<nav class="main-nav" aria-label="Navegação principal">${headerLinks[mode] || headerLinks.account}</nav><div class="header-tools">${mode === "store" ? storeActions : accountActions}</div>`;
+  }
+
   function avaliacaoProduto(produto) {
     return produto.quantidadeAvaliacoes
       ? `${Number(produto.mediaAvaliacoes).toFixed(1)} / 5`
@@ -62,7 +88,8 @@ const DSuplementosUI = (() => {
     `;
   }
 
-  return { cart, productCard };
+  return { cart, mountHeader, productCard };
 })();
 
 window.DSuplementosUI = DSuplementosUI;
+DSuplementosUI.mountHeader();

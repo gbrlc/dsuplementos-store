@@ -8,25 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="design-system.css?v=20260914" />
+    <link rel="stylesheet" href="design-system.css?v=20260914-3" />
   </head>
   <body>
-    <header class="site-header">
-      <a class="brand" href="index.html" aria-label="Pagina inicial DSuplementos Store">
-        <img src="assets/products/logo.jpeg" alt="D.Suplementos" width="256" height="256" decoding="async" />
-        <span>DSuplementos</span>
-      </a>
-      <nav class="main-nav" aria-label="Navegacao principal">
-        <a href="index.html#catalogo">Catálogo</a>
-        <a href="index.html#categorias">Categorias</a>
-        <a href="favoritos.html" data-favorites-link hidden>Favoritos</a>
-        <a href="dashboard.html" data-dashboard-link hidden>Gestão</a>
-      </nav>
-      <div class="header-tools">
-        <a class="header-link" data-account-link href="login.html">Entrar</a>
-        <button class="cart-trigger" type="button" data-open-cart> Carrinho <span data-cart-count>0</span></button>
-      </div>
-    </header>
+    <header class="site-header" data-site-header data-header-mode="store"></header>
 
     <main class="product-page">
       <a class="back-link" href="index.html#catalogo">Voltar ao catálogo</a>
@@ -87,7 +72,7 @@
     </dialog>
 
     <script src="api.js?v=20260813"></script>
-    <script src="ui.js?v=20260914"></script>
+    <script src="ui.js?v=20260914-2"></script>
     <script src="produto.js?v=20260914"></script>
   </body>
 </html>
