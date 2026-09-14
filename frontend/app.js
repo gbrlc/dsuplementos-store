@@ -69,24 +69,9 @@ function renderizarProdutos() {
     return;
   }
 
-  productsContainer.innerHTML = lista.map((produto) => `
-    <article class="product-card">
-      <a class="product-image" href="produto.html?id=${produto.id}">
-        <img src="${imagemUrl(produto.imagemUrl)}" alt="${escaparHtml(produto.nome)}" width="426" height="640" loading="lazy" decoding="async" />
-      </a>
-      <button class="favorite-button ${favoritosIds.has(produto.id) ? "is-favorite" : ""}" type="button" data-favorite-product="${produto.id}" aria-pressed="${favoritosIds.has(produto.id)}" aria-label="${favoritosIds.has(produto.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}" title="${favoritosIds.has(produto.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}">♥</button>
-      <div class="product-content">
-        <p class="product-category">${categoriaLegivel(produto.categoria)}</p>
-        <a class="product-name" href="produto.html?id=${produto.id}">${escaparHtml(produto.nome)}</a>
-        <p class="product-brand">${escaparHtml(produto.marca)}</p>
-        <div class="product-meta">
-          <strong>${formatarMoeda(produto.preco)}</strong>
-          <span>${produto.quantidadeAvaliacoes ? `${produto.mediaAvaliacoes.toFixed(1)} / 5` : "Sem avaliações"}</span>
-        </div>
-        <button class="button button-primary product-add" type="button" data-add-product="${produto.id}">Adicionar</button>
-      </div>
-    </article>
-  `).join("");
+  productsContainer.innerHTML = lista
+    .map((produto) => DSuplementosUI.productCard(produto, { favorito: favoritosIds.has(produto.id) }))
+    .join("");
 
   productsContainer.querySelectorAll("[data-add-product]").forEach((button) => {
     button.addEventListener("click", () => adicionarAoCarrinho(Number(button.dataset.addProduct)));
@@ -140,31 +125,7 @@ async function abrirCarrinho() {
 }
 
 function renderizarCarrinho(carrinho) {
-  if (!carrinho.itens.length) {
-    cartContent.innerHTML = '<p class="empty-state">Seu carrinho ainda está vazio.</p>';
-    return;
-  }
-
-  cartContent.innerHTML = `
-    <ul class="cart-list">
-      ${carrinho.itens.map((item) => `
-        <li class="cart-item">
-          <img src="${imagemUrl(item.imagemUrl)}" alt="" width="426" height="640" loading="lazy" decoding="async" />
-          <div>
-            <strong>${escaparHtml(item.nome)}</strong>
-            <span>${formatarMoeda(item.precoUnitario)}</span>
-          </div>
-          <div class="quantity-control">
-            <button type="button" data-change-quantity="${item.produtoId}" data-quantity="${item.quantidade - 1}" aria-label="Diminuir quantidade">−</button>
-            <span>${item.quantidade}</span>
-            <button type="button" data-change-quantity="${item.produtoId}" data-quantity="${item.quantidade + 1}" aria-label="Aumentar quantidade">+</button>
-          </div>
-        </li>
-      `).join("")}
-    </ul>
-    <div class="cart-total"><span>Total</span><strong>${formatarMoeda(carrinho.total)}</strong></div>
-    <a class="button button-primary checkout-link" href="checkout.html">Ir para checkout</a>
-  `;
+  cartContent.innerHTML = DSuplementosUI.cart(carrinho);
 
   cartContent.querySelectorAll("[data-change-quantity]").forEach((button) => {
     button.addEventListener("click", () => alterarQuantidadeCarrinho(

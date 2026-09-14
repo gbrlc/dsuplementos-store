@@ -170,17 +170,7 @@ async function abrirCarrinho() {
   cartDialog.showModal();
   try {
     const carrinho = await requisicaoApi("/carrinho");
-    if (!carrinho.itens.length) {
-      cartContent.innerHTML = '<p class="empty-state">Seu carrinho ainda está vazio.</p>';
-      return;
-    }
-    cartContent.innerHTML = `
-      <ul class="cart-list">
-        ${carrinho.itens.map((item) => `<li class="cart-item"><img src="${imagemUrl(item.imagemUrl)}" alt="" width="426" height="640" loading="lazy" decoding="async" /><div><strong>${escaparHtml(item.nome)}</strong><span>${item.quantidade} x ${formatarMoeda(item.precoUnitario)}</span></div></li>`).join("")}
-      </ul>
-      <div class="cart-total"><span>Total</span><strong>${formatarMoeda(carrinho.total)}</strong></div>
-      <a class="button button-primary checkout-link" href="checkout.html">Ir para checkout</a>
-    `;
+    cartContent.innerHTML = DSuplementosUI.cart(carrinho, { permitirQuantidade: false });
   } catch (erro) {
     cartContent.innerHTML = `<p class="empty-state">${escaparHtml(erro.message)}</p>`;
   }
