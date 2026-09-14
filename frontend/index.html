@@ -9,54 +9,36 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="design-system.css?v=20260914-3" />
   </head>
   <body>
-    <header class="site-header">
-      <a class="brand" href="index.html" aria-label="Pagina inicial DSuplementos Store">
-        <img src="assets/products/logo.jpeg" alt="D.Suplementos" />
-        <span>DSuplementos</span>
-      </a>
-
-      <nav class="main-nav" aria-label="Navegacao principal">
-        <a href="#catalogo">Catálogo</a>
-        <a href="#categorias">Categorias</a>
-        <a href="favoritos.html" data-favorites-link hidden>Favoritos</a>
-        <a href="dashboard.html" data-dashboard-link hidden>Gestão</a>
-      </nav>
-
-      <div class="header-tools">
-        <a class="header-link" data-account-link href="login.html">Entrar</a>
-        <button class="cart-trigger" type="button" data-open-cart>
-          Carrinho <span data-cart-count>0</span>
-        </button>
-      </div>
-    </header>
+    <header class="site-header" data-site-header data-header-mode="store"></header>
 
     <main>
       <section class="hero-home">
         <div class="hero-copy">
-          <p class="eyebrow">Rotina em movimento</p>
-          <h1>O que sustenta o seu treino começa aqui.</h1>
-          <p>Seleção prática de suplementos para foco, força e consistência.</p>
+          <p class="eyebrow">Performance, todos os dias</p>
+          <h1>Evolua.<br />O resto acompanha.</h1>
+          <p>Suplementos escolhidos para transformar consistência em resultado.</p>
           <a class="button button-primary" href="#catalogo">Explorar produtos</a>
         </div>
         <div class="hero-product" aria-hidden="true">
-          <img src="assets/products/wheyblack.jpeg" alt="" />
+          <img src="assets/products/wheyblack.jpeg" alt="" width="426" height="640" fetchpriority="high" decoding="async" />
         </div>
       </section>
 
       <section class="benefits" aria-label="Diferenciais da loja">
         <article>
-          <strong>Catálogo curado</strong>
-          <span>Marcas e categorias organizadas</span>
+          <strong>Escolhas confiáveis</strong>
+          <span>As melhores marcas em um só lugar</span>
         </article>
         <article>
-          <strong>Avaliações reais</strong>
-          <span>Experiências de quem usa</span>
+          <strong>Experiências reais</strong>
+          <span>Avaliações de quem mantém o ritmo</span>
         </article>
         <article>
-          <strong>Conta protegida</strong>
-          <span>Acesso autenticado pela API</span>
+          <strong>Compra do seu jeito</strong>
+          <span>Favoritos, histórico e entrega organizados</span>
         </article>
       </section>
 
@@ -117,7 +99,7 @@
 
     <footer class="site-footer">
       <span>DSuplementos Store</span>
-      <span>Projeto de estudo em Java, Spring Boot e frontend.</span>
+      <span>Performance começa com consistência.</span>
     </footer>
 
     <dialog id="cart-dialog" class="cart-dialog">
@@ -128,7 +110,8 @@
       <div id="cart-content"></div>
     </dialog>
 
-    <script src="api.js"></script>
-    <script src="app.js"></script>
+    <script src="api.js?v=20260813"></script>
+    <script src="ui.js?v=20260914-2"></script>
+    <script src="app.js?v=20260914"></script>
   </body>
 </html>

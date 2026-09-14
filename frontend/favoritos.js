@@ -20,21 +20,9 @@ function renderizarFavoritos(produtos) {
     return;
   }
 
-  favoritesGrid.innerHTML = produtos.map((produto) => `
-    <article class="product-card">
-      <a class="product-image" href="produto.html?id=${produto.id}">
-        <img src="${imagemUrl(produto.imagemUrl)}" alt="${escaparHtml(produto.nome)}" />
-      </a>
-      <button class="favorite-button is-favorite" type="button" data-remove-favorite="${produto.id}" aria-label="Remover dos favoritos" title="Remover dos favoritos">♥</button>
-      <div class="product-content">
-        <p class="product-category">${categoriaLegivel(produto.categoria)}</p>
-        <a class="product-name" href="produto.html?id=${produto.id}">${escaparHtml(produto.nome)}</a>
-        <p class="product-brand">${escaparHtml(produto.marca)}</p>
-        <div class="product-meta"><strong>${formatarMoeda(produto.preco)}</strong><span>${produto.quantidadeAvaliacoes ? `${produto.mediaAvaliacoes.toFixed(1)} / 5` : "Sem avaliações"}</span></div>
-        <button class="button button-primary product-add" type="button" data-add-product="${produto.id}">Adicionar</button>
-      </div>
-    </article>
-  `).join("");
+  favoritesGrid.innerHTML = produtos
+    .map((produto) => DSuplementosUI.productCard(produto, { favorito: true, acaoFavorito: "remove" }))
+    .join("");
 
   favoritesGrid.querySelectorAll("[data-add-product]").forEach((button) => {
     button.addEventListener("click", () => adicionarAoCarrinho(Number(button.dataset.addProduct)));

@@ -8,18 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="design-system.css?v=20260914-3" />
   </head>
   <body>
-    <header class="site-header">
-      <a class="brand" href="index.html" aria-label="Pagina inicial DSuplementos Store">
-        <img src="assets/products/logo.jpeg" alt="D.Suplementos" />
-        <span>DSuplementos</span>
-      </a>
-      <div class="header-tools">
-        <a class="header-link" href="index.html">Loja</a>
-        <button class="header-link button-link" data-logout type="button">Sair</button>
-      </div>
-    </header>
+    <header class="site-header" data-site-header data-header-mode="account"></header>
 
     <main class="account-page">
       <section class="account-card" id="account-content" aria-live="polite">
@@ -27,7 +19,8 @@
       </section>
     </main>
 
-    <script src="api.js"></script>
+    <script src="api.js?v=20260813"></script>
+    <script src="ui.js?v=20260914-2"></script>
     <script src="conta.js"></script>
   </body>
 </html>

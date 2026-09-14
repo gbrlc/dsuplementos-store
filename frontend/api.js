@@ -1,6 +1,20 @@
 const API_BASE_URL = window.DSUPLEMENTOS_API_URL || "http://localhost:8080/api";
 const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, "");
 const SESSION_KEY = "dsuplementos.session";
+window.CATALOGO_APRESENTACAO = [
+  { id: 1, nome: "Whey Protein", categoria: "WHEY", marca: "Integralmedica", preco: 119.9, estoque: 20, imagemUrl: "assets/products/wheyintegral.jpeg", descricao: "Whey protein para complementar sua rotina de treino.", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 2, nome: "Creatina", categoria: "CREATINA", marca: "Absolut Nutrition", preco: 89.9, estoque: 15, imagemUrl: "assets/products/creatinaabsolut.jpeg", descricao: "Creatina monohidratada para sua rotina de força.", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 3, nome: "Bone Crusher", categoria: "COLAGENO", marca: "Dark Lab", preco: 89.9, estoque: 10, imagemUrl: "assets/products/colageno2.jpeg", descricao: "Suplemento de colágeno para sua rotina.", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 4, nome: "Colageno", categoria: "COLAGENO", marca: "Max Titanium", preco: 89.9, estoque: 12, imagemUrl: "assets/products/colageno.jpeg", descricao: "Colágeno para complementar seus cuidados diários.", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 5, nome: "Creatina Black", categoria: "CREATINA", marca: "Dark Lab", preco: 89.9, estoque: 18, imagemUrl: "assets/products/creatina3.jpeg", descricao: "Creatina para complementar sua rotina de treino.", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 6, nome: "Creatina Mono", categoria: "CREATINA", marca: "Absolut Nutrition", preco: 89.9, estoque: 16, imagemUrl: "assets/products/creatina.jpeg", descricao: "Creatina monohidratada para treinos consistentes.", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 7, nome: "Multi", categoria: "VITAMINAS", marca: "Integralmedica", preco: 89.9, estoque: 14, imagemUrl: "assets/products/multi.jpeg", descricao: "Multivitamínico para complementar sua rotina.", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 8, nome: "Whey Integral", categoria: "WHEY", marca: "Integralmedica", preco: 89.9, estoque: 21, imagemUrl: "assets/products/wheyintegral.jpeg", descricao: "Whey protein para complementar sua rotina de treino.", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 9, nome: "Whey Max", categoria: "WHEY", marca: "Max Titanium", preco: 89.9, estoque: 17, imagemUrl: "assets/products/wheymax.jpeg", descricao: "Whey protein para a sua rotina de treino.", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 10, nome: "Whey Zeo", categoria: "WHEY", marca: "Max Titanium", preco: 89.9, estoque: 13, imagemUrl: "assets/products/wheyy.jpeg", descricao: "Whey protein para complementar seus objetivos.", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 11, nome: "Whey Black", categoria: "WHEY", marca: "Dark Lab", preco: 79.9, estoque: 23, imagemUrl: "assets/products/wheyblack.jpeg", descricao: "Whey protein para sua rotina de treino.", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 },
+  { id: 12, nome: "Colageno EPA", categoria: "COLAGENO", marca: "Max Titanium", preco: 79.9, estoque: 11, imagemUrl: "assets/products/colagenoepa.jpeg", descricao: "Colágeno para complementar seus cuidados diários.", mediaAvaliacoes: 0, quantidadeAvaliacoes: 0 }
+];
 let renovacaoEmAndamento = null;
 
 function formatarMoeda(valor) {
@@ -48,9 +62,11 @@ function encerrarSessao() {
 }
 
 async function requisicaoApi(caminho, opcoes = {}) {
-  const { tentarRenovar = true, ...opcoesFetch } = opcoes;
+  const { tentarRenovar = true, timeoutMs, ...opcoesFetch } = opcoes;
   const headers = new Headers(opcoesFetch.headers || {});
   const sessao = obterSessao();
+  const controller = timeoutMs ? new AbortController() : null;
+  const timeout = controller ? window.setTimeout(() => controller.abort(), timeoutMs) : null;
 
   if (sessao?.token) {
     headers.set("Authorization", `Bearer ${sessao.token}`);
@@ -61,9 +77,18 @@ async function requisicaoApi(caminho, opcoes = {}) {
 
   let response;
   try {
-    response = await fetch(`${API_BASE_URL}${caminho}`, { ...opcoesFetch, headers });
-  } catch {
+    response = await fetch(`${API_BASE_URL}${caminho}`, {
+      ...opcoesFetch,
+      headers,
+      signal: controller?.signal || opcoesFetch.signal
+    });
+  } catch (erro) {
+    if (erro.name === "AbortError") {
+      throw new Error("A API demorou demais para responder.");
+    }
     throw new Error("Nao foi possivel conectar com a API. Inicie o backend e confira a configuracao.");
+  } finally {
+    if (timeout) window.clearTimeout(timeout);
   }
 
   const contentType = response.headers.get("content-type") || "";
