@@ -1,0 +1,12 @@
+.git
+.idea
+.env
+**/.env
+**/target
+**/uploads
+.resume-render
+.resume-render-pdf
+output
+*.docx
+*.pdf
+frontend
