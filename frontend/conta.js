@@ -8,11 +8,19 @@ async function carregarConta() {
   }
 
   try {
+    const enderecosPromise = requisicaoApi("/usuarios/me/enderecos")
+      .then((enderecos) => ({ enderecos }))
+      .catch((erro) => ({ erro }));
     const usuario = await requisicaoApi("/usuarios/me");
     const sessao = obterSessao();
     salvarSessao({ ...sessao, usuario });
     renderizarConta(usuario);
-    await carregarEnderecos();
+    const resultadoEnderecos = await enderecosPromise;
+    if (resultadoEnderecos.enderecos) {
+      renderizarEnderecos(resultadoEnderecos.enderecos);
+    } else {
+      document.getElementById("addresses-list").innerHTML = `<p class="form-feedback">${escaparHtml(resultadoEnderecos.erro.message)}</p>`;
+    }
   } catch (erro) {
     accountContent.innerHTML = `<p class="empty-state">${escaparHtml(erro.message)}</p>`;
   }
@@ -130,6 +138,60 @@ function renderizarConta(usuario) {
   document.getElementById("password-form").addEventListener("submit", atualizarSenha);
   document.getElementById("address-form").addEventListener("submit", salvarEndereco);
   document.getElementById("cancel-address-edit").addEventListener("click", cancelarEdicaoEndereco);
+  configurarBuscaCep();
+}
+
+function configurarBuscaCep() {
+  const form = document.getElementById("address-form");
+  const cepInput = form?.elements.cep;
+  if (!cepInput) return;
+
+  cepInput.addEventListener("input", () => {
+    const digitos = cepInput.value.replace(/\D/g, "").slice(0, 8);
+    cepInput.value = digitos.length > 5 ? `${digitos.slice(0, 5)}-${digitos.slice(5)}` : digitos;
+  });
+  cepInput.addEventListener("blur", () => buscarEnderecoPorCep(form));
+}
+
+async function buscarEnderecoPorCep(form) {
+  const cep = form.elements.cep.value.replace(/\D/g, "");
+  if (!cep) return;
+  const feedback = document.getElementById("address-feedback");
+
+  if (!/^\d{8}$/.test(cep)) {
+    feedback.textContent = "Digite um CEP com 8 números.";
+    feedback.dataset.tipo = "erro";
+    return;
+  }
+
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 6000);
+  form.elements.cep.setAttribute("aria-busy", "true");
+  feedback.textContent = "Buscando endereço pelo CEP…";
+  feedback.dataset.tipo = "carregando";
+
+  try {
+    const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`, { signal: controller.signal });
+    if (!response.ok) throw new Error("Não foi possível consultar o CEP.");
+    const endereco = await response.json();
+    if (endereco.erro) throw new Error("CEP não encontrado.");
+
+    form.elements.logradouro.value = endereco.logradouro || "";
+    form.elements.bairro.value = endereco.bairro || "";
+    form.elements.cidade.value = endereco.localidade || "";
+    form.elements.estado.value = endereco.uf || "";
+    feedback.textContent = "Endereço encontrado. Informe o número para continuar.";
+    feedback.dataset.tipo = "sucesso";
+    form.elements.numero.focus();
+  } catch (erro) {
+    feedback.textContent = erro.name === "AbortError"
+      ? "A busca demorou demais. Você pode preencher o endereço manualmente."
+      : erro.message;
+    feedback.dataset.tipo = "erro";
+  } finally {
+    window.clearTimeout(timeout);
+    form.elements.cep.removeAttribute("aria-busy");
+  }
 }
 
 async function atualizarPerfil(event) {

@@ -74,7 +74,7 @@ function renderizarProdutos() {
     .join("");
 
   productsContainer.querySelectorAll("[data-add-product]").forEach((button) => {
-    button.addEventListener("click", () => adicionarAoCarrinho(Number(button.dataset.addProduct)));
+    button.addEventListener("click", () => adicionarAoCarrinho(Number(button.dataset.addProduct), button));
   });
   productsContainer.querySelectorAll("[data-favorite-product]").forEach((button) => {
     button.addEventListener("click", () => alterarFavorito(Number(button.dataset.favoriteProduct)));
@@ -144,7 +144,7 @@ async function alterarQuantidadeCarrinho(produtoId, quantidade) {
           body: JSON.stringify({ quantidade })
         });
     renderizarCarrinho(carrinho);
-    await atualizarCarrinho();
+    sincronizarResumoCarrinho(carrinho);
   } catch (erro) {
     mostrarToast(erro.message, "erro");
   }

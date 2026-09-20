@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="design-system.css?v=20260914-3" />
+    <link rel="stylesheet" href="design-system.css?v=20260920" />
   </head>
   <body>
     <header class="site-header" data-site-header data-header-mode="store"></header>
@@ -42,11 +42,27 @@
         </article>
       </section>
 
+      <section class="editorial-feature" aria-label="Seleção em destaque">
+        <div class="editorial-feature__image">
+          <img src="assets/products/creatinaabsolut.jpeg" alt="Creatina Absolut Nutrition" width="426" height="640" loading="lazy" decoding="async" />
+        </div>
+        <div class="editorial-feature__copy">
+          <p class="eyebrow">Essencial da rotina</p>
+          <h2>Força construída todos os dias.</h2>
+          <p>Uma seleção direta ao ponto para quem leva consistência a sério — fórmula, procedência e praticidade no mesmo lugar.</p>
+          <a class="text-link" href="#catalogo" data-category-shortcut="CREATINA">Explorar creatinas <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="editorial-feature__note">
+          <span>01</span>
+          <p>Performance não precisa ser complicada. Precisa ser constante.</p>
+        </div>
+      </section>
+
       <section class="catalog-section" id="catalogo">
         <div class="section-title">
           <div>
             <p class="eyebrow">Catálogo</p>
-            <h2>Encontre o suplemento da sua rotina</h2>
+            <h2>O que a sua rotina pede.</h2>
           </div>
           <p id="catalog-status" class="muted-text" aria-live="polite"></p>
         </div>
@@ -111,8 +127,8 @@
     </dialog>
 
     <script src="config.js?v=20260915"></script>
-    <script src="api.js?v=20260915"></script>
+    <script src="api.js?v=20260920"></script>
     <script src="ui.js?v=20260914-2"></script>
-    <script src="app.js?v=20260914"></script>
+    <script src="app.js?v=20260920"></script>
   </body>
 </html>
