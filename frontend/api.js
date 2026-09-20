@@ -205,9 +205,7 @@ async function atualizarCarrinho() {
 
   try {
     const carrinho = await requisicaoApi("/carrinho");
-    if (count) {
-      count.textContent = carrinho.itens.reduce((soma, item) => soma + item.quantidade, 0);
-    }
+    sincronizarResumoCarrinho(carrinho);
     return carrinho;
   } catch (erro) {
     if (count) count.textContent = "0";
@@ -215,21 +213,56 @@ async function atualizarCarrinho() {
   }
 }
 
-async function adicionarAoCarrinho(produtoId) {
+function sincronizarResumoCarrinho(carrinho) {
+  const quantidade = carrinho?.itens?.reduce((soma, item) => soma + item.quantidade, 0) || 0;
+  document.querySelectorAll("[data-cart-count]").forEach((count) => {
+    count.textContent = String(quantidade);
+    count.classList.toggle("has-items", quantidade > 0);
+  });
+  window.dispatchEvent(new CustomEvent("dsuplementos:cart-updated", { detail: carrinho }));
+  return quantidade;
+}
+
+async function adicionarAoCarrinho(produtoId, trigger = null) {
   if (!obterSessao()?.token) {
     window.location.href = `login.html?redirect=${encodeURIComponent(window.location.pathname.split("/").pop() || "index.html")}`;
     return;
   }
 
+  const count = document.querySelector("[data-cart-count]");
+  const quantidadeAnterior = Number(count?.textContent || 0);
+  if (count) {
+    count.textContent = String(quantidadeAnterior + 1);
+    count.classList.add("has-items", "is-updating");
+  }
+  if (trigger) {
+    trigger.disabled = true;
+    trigger.setAttribute("aria-busy", "true");
+    trigger.dataset.labelOriginal = trigger.textContent;
+    trigger.textContent = "Adicionando…";
+  }
+
   try {
-    await requisicaoApi("/carrinho/itens", {
+    const carrinho = await requisicaoApi("/carrinho/itens", {
       method: "POST",
       body: JSON.stringify({ produtoId, quantidade: 1 })
     });
-    await atualizarCarrinho();
+    sincronizarResumoCarrinho(carrinho);
     mostrarToast("Produto adicionado ao carrinho.");
   } catch (erro) {
+    if (count) {
+      count.textContent = String(quantidadeAnterior);
+      count.classList.toggle("has-items", quantidadeAnterior > 0);
+    }
     mostrarToast(erro.message, "erro");
+  } finally {
+    count?.classList.remove("is-updating");
+    if (trigger) {
+      trigger.disabled = false;
+      trigger.removeAttribute("aria-busy");
+      trigger.textContent = trigger.dataset.labelOriginal || "Adicionar";
+      delete trigger.dataset.labelOriginal;
+    }
   }
 }
 

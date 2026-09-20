@@ -25,7 +25,7 @@ function renderizarFavoritos(produtos) {
     .join("");
 
   favoritesGrid.querySelectorAll("[data-add-product]").forEach((button) => {
-    button.addEventListener("click", () => adicionarAoCarrinho(Number(button.dataset.addProduct)));
+    button.addEventListener("click", () => adicionarAoCarrinho(Number(button.dataset.addProduct), button));
   });
   favoritesGrid.querySelectorAll("[data-remove-favorite]").forEach((button) => {
     button.addEventListener("click", () => removerFavorito(Number(button.dataset.removeFavorite)));

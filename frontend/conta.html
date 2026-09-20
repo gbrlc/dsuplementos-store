@@ -8,20 +8,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="design-system.css?v=20260914-3" />
+    <link rel="stylesheet" href="design-system.css?v=20260920" />
   </head>
   <body>
     <header class="site-header" data-site-header data-header-mode="account"></header>
 
     <main class="account-page">
       <section class="account-card" id="account-content" aria-live="polite">
-        <p class="muted-text">Carregando sua conta...</p>
+        <div class="account-loading" role="status">
+          <span class="loading-orbit" aria-hidden="true"></span>
+          <div><strong>Preparando sua conta</strong><p>Na primeira visita, o servidor pode levar alguns segundos para despertar.</p></div>
+        </div>
       </section>
     </main>
 
     <script src="config.js?v=20260915"></script>
-    <script src="api.js?v=20260915"></script>
+    <script src="api.js?v=20260920"></script>
     <script src="ui.js?v=20260914-2"></script>
-    <script src="conta.js"></script>
+    <script src="conta.js?v=20260920"></script>
   </body>
 </html>

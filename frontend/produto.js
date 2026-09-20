@@ -64,7 +64,7 @@ function renderizarProduto(produto) {
     </div>
   `;
 
-  productDetail.querySelector(".detail-add")?.addEventListener("click", () => adicionarAoCarrinho(produto.id));
+  productDetail.querySelector(".detail-add")?.addEventListener("click", (event) => adicionarAoCarrinho(produto.id, event.currentTarget));
   productDetail.querySelector(".detail-favorite")?.addEventListener("click", alterarFavoritoDaPagina);
 }
 
