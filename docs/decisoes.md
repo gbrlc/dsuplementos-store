@@ -57,3 +57,13 @@
 **Decisão:** desabilitar a Data API no painel do Supabase para impedir acesso externo às tabelas por esse caminho. Preservar a conexão JDBC usada pelo backend.
 
 **Consequência:** a configuração é operacional, específica do provedor; não é aplicada por Flyway. Deve ser verificada ao recriar o ambiente. Antes de habilitar SDK/REST/GraphQL do Supabase, revisar grants e RLS. O plano gratuito também pode pausar o projeto; a retomada do banco deve preceder um redeploy se isso ocorrer.
+
+## 10. Solicitação sem controle automático de saldo e envio de e-mail
+
+**Contexto atualizado pelo responsável:** comércio pequeno, com reposição frequente e sem necessidade de manter saldo sincronizado no site.
+
+**Decisão:** o fluxo de solicitações não valida, baixa ou recompõe saldo numérico. Produtos inativos são rejeitados e a disponibilidade física é confirmada no atendimento. A coluna antiga é preservada por compatibilidade; não se simula saldo infinito. Esta decisão substitui a reserva de estoque da decisão 3.
+
+**Decisão de envio:** gravar snapshot da notificação junto com o pedido, publicar ID no RabbitMQ e consumir via API HTTPS do Resend. Outbox, deduplicação e retries limitados substituem a publicação volátil após commit da decisão 6. RabbitMQ já era dependência do projeto; não foi necessário instalar software no computador para adicionar o consumidor.
+
+**Consequência:** são necessários broker hospedado, remetente autorizado, destinatário e chave de envio. O Render gratuito bloqueia as portas SMTP usuais. Ainda não se reivindica entrega real de e-mail; veja [configuração e limites](email-pedidos.md).

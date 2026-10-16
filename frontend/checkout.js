@@ -99,7 +99,7 @@ async function criarPedido(event) {
       <section class="checkout-success">
         <p class="eyebrow">Pedido criado</p>
         <h1>Pedido #${pedido.id} recebido.</h1>
-        <p>O estoque foi reservado. Nesta versão de estudo, você pode simular o pagamento na página de pedidos.</p>
+        <p>Sua solicitação foi registrada. A loja confirma a disponibilidade e conclui a venda pelo WhatsApp. Não há pagamento online.</p>
         <a class="button button-primary" href="pedidos.html">Ver meus pedidos</a>
       </section>
     `;

@@ -41,7 +41,7 @@ public class CarrinhoApiService {
     public CarrinhoResponse adicionar(Usuario usuario, Long produtoId, int quantidade) {
         Carrinho carrinho = obterOuCriar(usuario);
         Produto produto = produtoService.buscarEntidadeAtiva(produtoId);
-        validarEstoque(produto, quantidade);
+
 
         ItemCarrinho item = carrinho.getItens().stream()
                 .filter(itemCarrinho -> itemCarrinho.getProduto().getId().equals(produtoId))
@@ -53,7 +53,7 @@ public class CarrinhoApiService {
             carrinho.adicionarItem(novoItem);
             itemCarrinhoRepository.save(novoItem);
         } else {
-            validarEstoque(produto, item.getQuantidade() + quantidade);
+
             item.setQuantidade(item.getQuantidade() + quantidade);
         }
 
@@ -64,7 +64,7 @@ public class CarrinhoApiService {
     public CarrinhoResponse atualizarQuantidade(Usuario usuario, Long produtoId, int quantidade) {
         Carrinho carrinho = obterOuCriar(usuario);
         ItemCarrinho item = encontrarItem(carrinho, produtoId);
-        validarEstoque(item.getProduto(), quantidade);
+
         item.setQuantidade(quantidade);
         return paraResponse(carrinhoRepository.save(carrinho));
     }
@@ -86,12 +86,6 @@ public class CarrinhoApiService {
                 .filter(item -> item.getProduto().getId().equals(produtoId))
                 .findFirst()
                 .orElseThrow(() -> new RegraDeNegocioException("Produto nao esta no carrinho."));
-    }
-
-    private void validarEstoque(Produto produto, int quantidade) {
-        if (quantidade > produto.getEstoque()) {
-            throw new RegraDeNegocioException("Quantidade maior que o estoque disponivel.");
-        }
     }
 
     private CarrinhoResponse paraResponse(Carrinho carrinho) {

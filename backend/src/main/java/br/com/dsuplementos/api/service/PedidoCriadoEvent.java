@@ -1,7 +1,4 @@
 package br.com.dsuplementos.api.service;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-
-public record PedidoCriadoEvent(Long pedidoId, BigDecimal total, Instant criadoEm) {
-}
+// Dados pessoais ficam no banco, nao na mensagem do broker.
+public record PedidoCriadoEvent(Long pedidoId) {}

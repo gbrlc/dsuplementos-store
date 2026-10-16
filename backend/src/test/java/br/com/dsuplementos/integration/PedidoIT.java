@@ -57,20 +57,21 @@ class PedidoIT {
     private int estoque(Long id) {
         return tx.execute(status -> em.find(Produto.class, id).getEstoque());
     }
-    @Test void reservaECancelamentoRepetido() {
+    @Test void solicitacaoECancelamentoNaoAlteramSaldoLegado() {
         Cenario c = preparar(3, 2);
         var pedido = pedidos.criarPedido(c.usuario(), new CheckoutRequest(c.endereco()));
-        assertThat(estoque(c.produto())).isEqualTo(1);
+        assertThat(estoque(c.produto())).isEqualTo(3);
         pedidos.cancelar(c.usuario(), pedido.id());
         assertThat(estoque(c.produto())).isEqualTo(3);
         assertThatThrownBy(() -> pedidos.cancelar(c.usuario(), pedido.id())).isInstanceOf(RegraDeNegocioException.class);
         assertThat(estoque(c.produto())).isEqualTo(3);
     }
-    @Test void falhaNoSegundoProdutoDesfazPrimeiraReserva() {
+    @Test void produtoInativoDesfazPedidoInteiro() {
         Cenario c = preparar(3, 2);
         tx.executeWithoutResult(status -> {
             Produto primeiro = em.find(Produto.class, c.produto());
             Produto indisponivel = new Produto("Indisponivel", Categoria.WHEY, primeiro.getMarca(), BigDecimal.TEN, 0, "Teste", null);
+            org.springframework.test.util.ReflectionTestUtils.setField(indisponivel, "ativo", false);
             em.persist(indisponivel);
             Carrinho carrinho = em.createQuery("select c from Carrinho c where c.usuario.id = :id", Carrinho.class)
                     .setParameter("id", c.usuario().getId()).getSingleResult();
@@ -104,7 +105,7 @@ class PedidoIT {
             assertThat(estoque(c.produto())).isEqualTo(3);
         } finally { pool.shutdownNow(); }
     }
-    @Test void doisClientesDisputamUltimaUnidade() throws Exception {
+    @Test void solicitacoesConcorrentesNaoDependemDoSaldoLegado() throws Exception {
         Cenario a = preparar(1, 1);
         Cenario b = tx.execute(status -> {
             Usuario usuario = new Usuario("Outro", UUID.randomUUID() + "@example.com", "hash", Role.CLIENTE);
@@ -127,8 +128,8 @@ class PedidoIT {
             Future<Boolean> primeiro = pool.submit(comprar.apply(a)), segundo = pool.submit(comprar.apply(b));
             inicio.countDown();
             assertThat(java.util.List.of(primeiro.get(20, TimeUnit.SECONDS), segundo.get(20, TimeUnit.SECONDS)))
-                    .containsExactlyInAnyOrder(true, false);
-            assertThat(estoque(a.produto())).isZero();
+                    .containsExactlyInAnyOrder(true, true);
+            assertThat(estoque(a.produto())).isEqualTo(1);
         } finally { pool.shutdownNow(); }
     }
 

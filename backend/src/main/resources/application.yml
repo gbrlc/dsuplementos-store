@@ -26,6 +26,11 @@ spring:
       max-file-size: 5MB
       max-request-size: 20MB
   rabbitmq:
+    addresses: ${RABBITMQ_ADDRESSES:${RABBITMQ_HOST:localhost}:${RABBITMQ_PORT:5672}}
+    listener:
+      simple:
+        default-requeue-rejected: false
+        prefetch: 1
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:guest}
@@ -53,11 +58,18 @@ app:
     password: ${APP_ADMIN_PASSWORD:}
   seed-catalog:
     enabled: ${APP_SEED_CATALOG:true}
+  mail:
+    enabled: ${APP_MAIL_ENABLED:false}
+    from: ${APP_MAIL_FROM:}
+    to: ${APP_MAIL_TO:}
+    api-key: ${RESEND_API_KEY:}
+    base-url: ${APP_MAIL_BASE_URL:https://api.resend.com}
+    poll-interval-ms: ${APP_MAIL_POLL_INTERVAL_MS:30000}
   messaging:
     orders:
       enabled: ${APP_MESSAGING_ORDERS_ENABLED:false}
       exchange: ${APP_MESSAGING_ORDERS_EXCHANGE:dsuplementos.pedidos}
-      queue: ${APP_MESSAGING_ORDERS_QUEUE:dsuplementos.pedidos.criados}
+      queue: ${APP_MESSAGING_ORDERS_QUEUE:dsuplementos.pedidos.email.v1}
       routing-key: ${APP_MESSAGING_ORDERS_ROUTING_KEY:pedido.criado}
 
 springdoc:
