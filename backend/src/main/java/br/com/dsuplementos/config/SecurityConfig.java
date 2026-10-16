@@ -115,14 +115,14 @@ public class SecurityConfig {
     ) throws IOException {
         response.setStatus(status.value());
         response.setContentType("application/json");
-        objectMapper.writeValue(response.getOutputStream(), ApiErrorResponse.builder()
-                .timestamp(Instant.now())
-                .status(status.value())
-                .erro(status.getReasonPhrase())
-                .codigo(codigo)
-                .mensagem(mensagem)
-                .caminho(caminho)
-                .campos(java.util.Map.of())
-                .build());
+        objectMapper.writeValue(response.getOutputStream(), new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                codigo,
+                mensagem,
+                caminho,
+                java.util.Map.of()
+        ));
     }
 }

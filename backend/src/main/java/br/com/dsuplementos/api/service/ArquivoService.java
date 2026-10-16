@@ -36,6 +36,12 @@ public class ArquivoService {
             throw new RegraDeNegocioException("Use imagens JPG, PNG ou WEBP.");
         }
 
+        try (var entrada = arquivo.getInputStream()) {
+            validarAssinatura(entrada.readNBytes(16), extensao);
+        } catch (IOException exception) {
+            throw new RegraDeNegocioException("Nao foi possivel ler a imagem.");
+        }
+
         try {
             Path reviews = uploadDirectory.resolve("reviews");
             Files.createDirectories(reviews);
@@ -46,10 +52,30 @@ public class ArquivoService {
                 throw new RegraDeNegocioException("Nome de arquivo invalido.");
             }
 
-            Files.copy(arquivo.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
+            try (var entrada = arquivo.getInputStream()) {
+                Files.copy(entrada, destino, StandardCopyOption.REPLACE_EXISTING);
+            }
             return "/uploads/reviews/" + nomeGerado;
         } catch (IOException exception) {
             throw new RegraDeNegocioException("Nao foi possivel salvar a imagem da avaliacao.");
+        }
+    }
+
+    private void validarAssinatura(byte[] bytes, String extensao) {
+        boolean valida = switch (extensao) {
+            case "jpg", "jpeg" -> bytes.length >= 3 && (bytes[0] & 255) == 255
+                    && (bytes[1] & 255) == 216 && (bytes[2] & 255) == 255;
+            case "png" -> bytes.length >= 8 && java.util.Arrays.equals(
+                    java.util.Arrays.copyOf(bytes, 8), new byte[]{(byte) 137, 80, 78, 71, 13, 10, 26, 10});
+            case "webp" -> bytes.length >= 16
+                    && new String(bytes, 0, 4, java.nio.charset.StandardCharsets.US_ASCII).equals("RIFF")
+                    && new String(bytes, 8, 4, java.nio.charset.StandardCharsets.US_ASCII).equals("WEBP")
+                    && java.util.Set.of("VP8 ", "VP8L", "VP8X").contains(
+                        new String(bytes, 12, 4, java.nio.charset.StandardCharsets.US_ASCII));
+            default -> false;
+        };
+        if (!valida) {
+            throw new RegraDeNegocioException("O conteudo do arquivo nao corresponde ao formato da imagem.");
         }
     }
 

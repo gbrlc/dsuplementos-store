@@ -1,5 +1,7 @@
 # Backend - DSuplementos API
 
+Esta documentação descreve os recursos presentes na API. O uso comercial informado é catálogo, solicitação por e-mail e fechamento pelo WhatsApp; a integração de envio de e-mail não foi identificada neste código. Checkout, frete e pagamento simulado são recursos demonstrativos e não comprovam venda ou recebimento. Veja o [README principal](../README.md) para execução, testes e limites.
+
 API REST criada com Spring Boot para substituir os dados em memória por PostgreSQL e servir o frontend da DSuplementos Store.
 
 ## Duas etapas convivendo aqui
@@ -47,7 +49,7 @@ set +a
 mvn spring-boot:run
 ```
 
-Você precisa ter Java 21 ou superior e Maven instalados. O computador atual já possui Maven e Java 26, que executam o projeto configurado para Java 21.
+Use Java 21 e Maven 3.9 para reproduzir o ambiente do CI.
 
 ### Perfis de execucao
 

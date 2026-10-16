@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ProdutoService {
@@ -42,12 +44,12 @@ public class ProdutoService {
 
     @Transactional(readOnly = true)
     public List<ProdutoResponse> listar(Categoria categoria, BigDecimal precoMinimo, BigDecimal precoMaximo, String ordenar) {
-        return ordenar(produtoRepository.findByAtivoTrue(), ordenar).stream()
+        List<Produto> produtos = ordenar(produtoRepository.findByAtivoTrue(), ordenar).stream()
                 .filter(produto -> categoria == null || produto.getCategoria() == categoria)
                 .filter(produto -> precoMinimo == null || produto.getPreco().compareTo(precoMinimo) >= 0)
                 .filter(produto -> precoMaximo == null || produto.getPreco().compareTo(precoMaximo) <= 0)
-                .map(this::paraResponse)
                 .toList();
+        return paraResponses(produtos);
     }
 
     @Transactional(readOnly = true)
@@ -57,9 +59,7 @@ public class ProdutoService {
 
     @Transactional(readOnly = true)
     public List<ProdutoResponse> listarInventario() {
-        return produtoRepository.findAllByOrderByNomeAsc().stream()
-                .map(this::paraResponse)
-                .toList();
+        return paraResponses(produtoRepository.findAllByOrderByNomeAsc());
     }
 
     @Transactional(readOnly = true)
@@ -116,7 +116,7 @@ public class ProdutoService {
     }
 
     private Produto buscarEntidade(Long id) {
-        return produtoRepository.findById(id)
+        return produtoRepository.findByIdComBloqueio(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Produto nao encontrado."));
     }
 
@@ -134,6 +134,34 @@ public class ProdutoService {
 
         double mediaArredondada = BigDecimal.valueOf(media).setScale(1, RoundingMode.HALF_UP).doubleValue();
         return produtoMapper.toResponse(produto, mediaArredondada, avaliacoes.size());
+    }
+
+    private List<ProdutoResponse> paraResponses(List<Produto> produtos) {
+        if (produtos.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, ResumoAvaliacoes> resumos = avaliacaoRepository.resumirPorProdutoIds(
+                        produtos.stream().map(Produto::getId).toList()
+                ).stream()
+                .collect(Collectors.toMap(
+                        resumo -> (Long) resumo[0],
+                        resumo -> new ResumoAvaliacoes(((Number) resumo[1]).doubleValue(), ((Number) resumo[2]).longValue())
+                ));
+
+        return produtos.stream()
+                .map(produto -> {
+                    ResumoAvaliacoes resumo = resumos.getOrDefault(produto.getId(), ResumoAvaliacoes.VAZIO);
+                    double mediaArredondada = BigDecimal.valueOf(resumo.media())
+                            .setScale(1, RoundingMode.HALF_UP)
+                            .doubleValue();
+                    return produtoMapper.toResponse(produto, mediaArredondada, resumo.quantidade());
+                })
+                .toList();
+    }
+
+    private record ResumoAvaliacoes(double media, long quantidade) {
+        private static final ResumoAvaliacoes VAZIO = new ResumoAvaliacoes(0.0, 0);
     }
 
     private List<Produto> ordenar(List<Produto> produtos, String ordenar) {

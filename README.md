@@ -1,175 +1,144 @@
 # DSuplementos Store
 
-E-commerce de suplementos desenvolvido como projeto de portfolio e laboratório prático de Java, Spring Boot, banco de dados e frontend.
+Projeto desenvolvido e entregue para um pequeno comércio de suplementos, com catálogo online e uma API em Java 21 e Spring Boot.
 
-Sou formado em Análise e Desenvolvimento de Sistemas e estudo no Bootcamp Santander Java DIO 2026. A proposta deste repositório é transformar cada conteúdo estudado em uma parte funcional de um sistema, evoluindo de uma aplicação Java em memória para uma API real com PostgreSQL.
+No uso informado pelo cliente, o consumidor consulta o catálogo, solicita o pedido por e-mail e conclui a venda pelo WhatsApp. **Não há pagamento online integrado e um gateway de pagamento não faz parte da necessidade do negócio.**
 
-## O que esta versão adiciona
+[Catálogo publicado](https://dsuplementos-store-2.onrender.com/index.html) · [Backend e API](backend/README.md) · [Arquitetura](backend/ARCHITECTURE.md) · [Decisões técnicas](docs/decisoes.md)
 
-- API REST em Spring Boot 3.5
-- PostgreSQL em nuvem preparado para Supabase
-- Esquema SQL versionado com Flyway
-- Cadastro e login reais com senha protegida por BCrypt
-- Sessão com JWT, refresh token rotativo e logout revogável
-- Perfis `CLIENTE` e `ADMIN`
-- Perfil do cliente, troca de senha e endereços de entrega persistidos
-- Carrinho vinculado ao usuário no banco de dados
-- Checkout com frete simulado, reserva de estoque e histórico de pedidos
-- Produtos favoritos persistidos por conta
-- Página de produto dinâmica com avaliações e fotos
-- Dashboard de inventário protegido para o gestor
+## Uso real e escopo do repositório
 
-## Arquitetura
+| Contexto | Descrição |
+| --- | --- |
+| Operação do cliente | Catálogo → solicitação por e-mail → atendimento e fechamento pelo WhatsApp, conforme contexto informado pelo responsável pelo projeto |
+| Implementação presente | API de catálogo, usuários, endereços, carrinho, pedidos, estoque, favoritos e avaliações; interface HTML/CSS/JavaScript |
+| Recursos demonstrativos | Simulação de frete e pagamento, sem integração financeira. O estado `PAGO` pode ser marcado pelo próprio cliente no fluxo simulado e não comprova recebimento de dinheiro |
+| Integração ainda não identificada | O mecanismo de envio de solicitações por e-mail e encaminhamento ao WhatsApp não foi localizado neste código. Não se atribui esse envio à API sem evidência |
+| Mensageria opcional | Publicação RabbitMQ de `pedido.criado`, desabilitada por padrão; não envia e-mail nem conclui vendas |
 
-```text
-Browser (HTML, CSS e JavaScript)
-        |
-        | fetch com token JWT
-        v
-Spring Boot API
-        |
-        | Spring Data JPA + Flyway
-        v
-PostgreSQL no Supabase
-```
+A API reserva estoque ao criar um pedido e o devolve em cancelamentos permitidos. Esse comportamento técnico não equivale a uma venda concluída pelo WhatsApp. A conciliação com vendas externas e o prazo de reserva precisam ser definidos com o comércio antes de usar esse fluxo como controle operacional definitivo.
 
-## Estrutura
+## Stack e organização
+
+- Java 21, Spring Boot, Spring MVC, Spring Data JPA e PostgreSQL.
+- Spring Security, JWT, BCrypt e refresh tokens opacos persistidos por hash.
+- Flyway, Bean Validation, DTOs e MapStruct.
+- JUnit 5, Mockito, MockMvc e Testcontainers para PostgreSQL.
+- Docker multi-stage e workflow GitHub Actions.
+- Frontend HTML, CSS e JavaScript, servido separadamente da API.
 
 ```text
-dsuplementos-store
-├── database
-│   ├── README.md
-│   └── migrations
-│       └── V1__cria_estrutura_inicial.sql
-├── frontend
-│   ├── index.html             # Home e catálogo
-│   ├── produto.html           # Uma página reutilizável por produto
-│   ├── login.html             # Login e cadastro
-│   ├── conta.html             # Perfil autenticado
-│   ├── checkout.html          # Confirmação de entrega e pedido
-│   ├── pedidos.html           # Histórico e status dos pedidos
-│   ├── favoritos.html         # Produtos salvos pelo cliente
-│   ├── dashboard.html         # Gestão de estoque, somente ADMIN
-│   ├── api.js                 # Comunicação com a API e sessão JWT
-│   ├── app.js
-│   ├── produto.js
-│   ├── auth.js
-│   ├── dashboard.js
-│   ├── conta.js
-│   ├── style.css
-│   └── assets/products
-└── backend
-    ├── pom.xml
-    ├── .env.example
-    └── src/main/java/br/com/dsuplementos
-        ├── DsuplementosApplication.java
-        ├── api                 # Controllers e serviços da API
-        ├── config              # Segurança, CORS e dados iniciais
-        ├── domain              # Entidades JPA e enums
-        ├── dto                 # Dados recebidos e enviados pela API
-        ├── repository          # Spring Data JPA
-        └── security            # JWT
+frontend/                 catálogo e interface web
+backend/src/main/java/    controllers, services, domínio, segurança e repositories
+backend/src/test/java/    testes unitários, HTTP e integração
+backend/src/main/resources/ configurações por ambiente
+database/migrations/      migrations Flyway
+.github/workflows/ci.yml  testes e build da imagem
+Dockerfile                imagem somente do backend
+compose.yaml              API, PostgreSQL e RabbitMQ opcional
 ```
 
-O `Main.java` e as classes em memória originais continuam no backend como laboratório de Collections. A API inicia por `DsuplementosApplication.java`.
+Classes em `model`, `service` e `Main.java` preservam um exercício anterior de Java puro. A API inicia por `DsuplementosApplication` e usa `domain` e `api/service`.
 
-## Banco de dados
+## Execução local
 
-O banco escolhido é PostgreSQL no Supabase. O plano gratuito é suficiente para o estudo, tem painel para visualizar tabelas e permite, numa etapa posterior, armazenar as fotos das avaliações no Storage.
+### Java e PostgreSQL
 
-1. Crie um projeto em [Supabase](https://supabase.com/).
-2. Copie `backend/.env.example` para `backend/.env`.
-3. Preencha `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` e `JWT_SECRET` com valores privados.
-4. Defina também os dados `APP_ADMIN_*` para criar a conta do gestor na primeira execução.
-
-No macOS ou Linux, dentro de `backend`:
+Requer Java 21 e Maven 3.9, além de PostgreSQL acessível.
 
 ```bash
+cd backend
+cp .env.example .env
+# Edite .env com seus valores. Não versione credenciais.
 set -a
 source .env
 set +a
 mvn spring-boot:run
 ```
 
-O Flyway executará automaticamente todas as migrations em `database/migrations`, na ordem da versão. Nunca coloque o `.env` preenchido no Git.
+O arquivo `.env` deve usar sintaxe compatível com o shell, com aspas quando necessárias. Use um banco de desenvolvimento. O Flyway aplica migrations na inicialização; o Hibernate valida o schema.
 
-## Rodando o frontend
-
-Em outro terminal:
+Em outro terminal, na raiz do repositório:
 
 ```bash
-cd frontend
-python3 -m http.server 5500
+python3 -m http.server 5500 --directory frontend
 ```
 
-Abra [http://localhost:5500](http://localhost:5500). A API deve estar em `http://localhost:8080`.
+- Interface: `http://localhost:5500`
+- Catálogo API: `http://localhost:8080/api/produtos`
+- Swagger no perfil `dev`: `http://localhost:8080/swagger-ui.html`
 
-## Fluxos disponíveis
+O catálogo de exemplo é habilitado em `dev`. A criação inicial de administrador exige `APP_ADMIN_ENABLED=true` e valores próprios de `APP_ADMIN_NAME`, `APP_ADMIN_EMAIL` e `APP_ADMIN_PASSWORD`. O exemplo mantém essa criação desabilitada.
 
-### Cliente
+### Docker Compose
 
-1. Cria a conta em `login.html`.
-2. Faz login e recebe um access token e refresh token.
-3. Atualiza nome, senha e endereços em `conta.html`.
-4. Adiciona produtos ao carrinho, que fica associado à conta no banco.
-5. Define a entrega e cria o pedido pelo checkout. O produto e o endereço ficam registrados como uma cópia histórica da compra.
-6. Acompanha o pedido, simula o pagamento e pode cancelá-lo enquanto ele ainda não foi separado.
-7. Salva ou remove produtos da lista de favoritos.
-8. Abre `produto.html?id=1`, publica uma avaliação e pode anexar fotos.
+Requer Docker com Compose. Na raiz do repositório:
 
-### Gestor
+```bash
+export LOCAL_DB_PASSWORD='substitua-por-uma-senha-local'
+export JWT_SECRET='substitua-por-uma-chave-aleatoria-de-pelo-menos-32-bytes'
+docker compose up --build -d postgres api
+```
 
-1. A conta é criada a partir das variáveis `APP_ADMIN_*`, não por um botão público.
-2. Faz login pela mesma página de login.
-3. É direcionado para `dashboard.html`.
-4. Cadastra produtos, edita dados e atualiza estoque.
+A API fica em `http://localhost:8080`. O Compose usa `prod`, banco persistido em volume e catálogo de exemplo desabilitado; portanto, o banco novo não terá produtos. Sirva o frontend separadamente e configure um administrador explicitamente para cadastrar o catálogo. Os uploads ficam em volume próprio.
 
-## Principais endpoints
+Para parar sem apagar os dados:
 
-| Método | Endpoint | Acesso | Finalidade |
-| --- | --- | --- | --- |
-| `POST` | `/api/auth/cadastro` | Público | Criar conta de cliente |
-| `POST` | `/api/auth/login` | Público | Autenticar e receber uma sessão |
-| `POST` | `/api/auth/refresh` | Público | Rotacionar refresh token e renovar a sessão |
-| `POST` | `/api/auth/logout` | Público | Revogar um refresh token |
-| `GET` | `/api/usuarios/me` | Autenticado | Consultar perfil da própria conta |
-| `PUT` | `/api/usuarios/me` | Autenticado | Atualizar o próprio nome |
-| `PATCH` | `/api/usuarios/me/senha` | Autenticado | Trocar senha e revogar sessões renováveis |
-| `GET` | `/api/usuarios/me/enderecos` | Autenticado | Listar os próprios endereços |
-| `POST` | `/api/usuarios/me/enderecos` | Autenticado | Criar endereço de entrega |
-| `PUT` | `/api/usuarios/me/enderecos/{id}` | Dono | Atualizar o próprio endereço |
-| `DELETE` | `/api/usuarios/me/enderecos/{id}` | Dono | Excluir o próprio endereço |
-| `GET` | `/api/produtos` | Público | Listar catálogo |
-| `GET` | `/api/produtos/{id}` | Público | Ver produto |
-| `GET` | `/api/produtos/{id}/avaliacoes` | Público | Listar avaliações |
-| `POST` | `/api/produtos/{id}/avaliacoes` | Cliente/Admin | Criar avaliação |
-| `POST` | `/api/avaliacoes/{id}/fotos` | Dono/Admin | Enviar fotos da avaliação |
-| `GET` | `/api/carrinho` | Autenticado | Ler carrinho da conta |
-| `POST` | `/api/carrinho/itens` | Autenticado | Adicionar item |
-| `GET` | `/api/favoritos` | Autenticado | Listar produtos favoritos da conta |
-| `GET` | `/api/favoritos/{produtoId}` | Autenticado | Consultar se um produto está salvo |
-| `POST` | `/api/favoritos/{produtoId}` | Autenticado | Salvar produto nos favoritos |
-| `DELETE` | `/api/favoritos/{produtoId}` | Autenticado | Remover produto dos favoritos |
-| `GET` | `/api/pedidos/simulacao-frete` | Autenticado | Calcular frete a partir do carrinho |
-| `POST` | `/api/pedidos` | Autenticado | Criar pedido e reservar estoque |
-| `GET` | `/api/pedidos` | Autenticado | Listar histórico da própria conta |
-| `POST` | `/api/pedidos/{id}/pagamento-simulado` | Dono | Simular confirmação de pagamento |
-| `POST` | `/api/pedidos/{id}/cancelamento` | Dono | Cancelar e devolver itens ao estoque |
-| `GET` | `/api/admin/produtos` | Admin | Inventário completo |
-| `POST` | `/api/admin/produtos` | Admin | Cadastrar produto |
-| `PUT` | `/api/admin/produtos/{id}` | Admin | Editar produto |
-| `PATCH` | `/api/admin/produtos/{id}/estoque` | Admin | Alterar estoque |
+```bash
+docker compose down
+```
 
-## Próximos incrementos naturais
+O RabbitMQ é opcional:
 
-- Aplicar cupom e simular frete no checkout
-- Mover arquivos de `backend/uploads` para Supabase Storage
-- Adicionar paginação e busca feita pelo banco
-- Aumentar a cobertura com testes de integração
-- Conectar recursos de IA e voz estudados no bootcamp
+```bash
+docker compose --profile messaging up -d rabbitmq
+```
+
+Para API executada no host, configure `APP_MESSAGING_ORDERS_ENABLED=true` e as variáveis `RABBITMQ_*`. Para API no Compose, configure também `RABBITMQ_HOST=rabbitmq` no serviço. O painel local fica em `http://localhost:15672`; o Compose usa credenciais locais `guest/guest` e publica o broker apenas em loopback.
+
+### Imagem do backend
+
+```bash
+docker build -t dsuplementos-store .
+docker run --rm -p 8080:10000 --env-file backend/.env dsuplementos-store
+```
+
+O container usa `PORT=10000` por padrão e executa como usuário sem privilégios. O banco informado deve ser acessível de dentro do container; `localhost` dentro dele não aponta para o host.
+
+## Testes e CI
+
+```bash
+# Testes unitários e HTTP; compila também as classes de integração
+mvn -f backend/pom.xml test
+
+# Verificação completa, incluindo PostgreSQL descartável via Testcontainers
+# Requer Docker disponível
+mvn -f backend/pom.xml clean verify
+
+# Alternativa explícita sem Docker: não valida a integração com PostgreSQL
+mvn -f backend/pom.xml verify -DskipITs
+```
+
+Os testes HTTP exercitam o filtro JWT e as permissões reais, com dependências de autenticação simuladas. Os testes de integração `*IT` usam PostgreSQL e as migrations reais para verificar pedidos, rollback e concorrência. Eles não são ignorados automaticamente quando Docker está ausente: a verificação completa deve falhar nesse caso.
+
+O workflow executa a verificação com Java 21, disponibiliza relatórios, constrói a imagem Docker e verifica o catálogo com API e PostgreSQL no Compose. A existência do arquivo não comprova uma execução remota bem-sucedida. Consulte [GitHub Actions](https://github.com/gbrlc/dsuplementos-store/actions) para obter evidências após publicar as mudanças. O workflow não faz deploy.
+
+## Deploy e limites conhecidos
+
+O frontend configura a API externa em `frontend/config.js`. O Dockerfile deste repositório entrega somente o backend. Configure no serviço da API banco, chave JWT, `SPRING_PROFILES_ACTIVE=prod`, origens CORS e persistência dos uploads.
+
+A interface contém catálogo de apresentação como fallback. Ver produtos na página não comprova funcionamento da API ou do banco. Valide separadamente `GET /api/produtos`, autenticação e persistência em ambiente de homologação.
+
+- Não há gateway de pagamento, cálculo logístico externo ou confirmação financeira.
+- JWTs já emitidos continuam válidos até expirar, inclusive após logout ou troca de senha; refresh tokens são revogados.
+- Publicação RabbitMQ ocorre após commit, sem outbox ou reentrega garantida. Falhas são registradas em log.
+- Uploads verificam extensão, MIME declarado e assinatura de formato, mas não fazem análise completa de imagens ou antivírus.
+- Uploads usam filesystem; a persistência depende do volume/disco configurado no deploy.
+- O catálogo ainda filtra e ordena em memória.
+- Os testes não representam cobertura completa nem comprovam disponibilidade contínua do deploy.
 
 ## Autor
 
-Gabriel Costa
+Gabriel Costa — Desenvolvedor Backend Java
 
-Formado em Análise e Desenvolvimento de Sistemas. Estudante de Java e Spring Boot no Bootcamp Santander Java DIO 2026, com foco em construir aplicações completas e bem organizadas para portfolio.
+[GitHub](https://github.com/gbrlc) · [LinkedIn](https://www.linkedin.com/in/gabriel-costa-94b95616a)

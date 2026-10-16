@@ -41,4 +41,20 @@ class RefreshTokenServiceTest {
                 .isInstanceOf(RegraDeNegocioException.class)
                 .hasMessage("Sessao invalida ou expirada. Faca login novamente.");
     }
+    @Test void deveRejeitarTokenExpirado() {
+        Usuario usuario = new Usuario("Ana", "ana@example.com", "hash", Role.CLIENTE);
+        when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(
+                new RefreshToken(usuario, "hash", Instant.now().minusSeconds(1))));
+        assertThatThrownBy(() -> refreshTokenService.renovar("expirado"))
+                .isInstanceOf(RegraDeNegocioException.class);
+    }
+    @Test void deveRejeitarTokenRevogado() {
+        Usuario usuario = new Usuario("Ana", "ana@example.com", "hash", Role.CLIENTE);
+        RefreshToken token = new RefreshToken(usuario, "hash", Instant.now().plusSeconds(60));
+        token.revogar();
+        when(refreshTokenRepository.findByTokenHash(anyString())).thenReturn(Optional.of(token));
+        assertThatThrownBy(() -> refreshTokenService.renovar("revogado"))
+                .isInstanceOf(RegraDeNegocioException.class);
+    }
+
 }

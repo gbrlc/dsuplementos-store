@@ -1,12 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
-  },
+  "description": "API Java/Spring Boot. Execute com Maven; veja README.md.",
   "keywords": [],
   "author": "",
   "license": "ISC",
