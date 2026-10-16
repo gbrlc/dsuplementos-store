@@ -131,7 +131,7 @@ public class PedidoService {
     }
 
     private ProdutoSelecionado selecionarProdutoAtivo(ItemCarrinho itemCarrinho) {
-        Produto produto = produtoRepository.findByIdAndAtivoTrue(itemCarrinho.getProduto().getId())
+        Produto produto = produtoRepository.findById(itemCarrinho.getProduto().getId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Produto nao encontrado."));
         if (!produto.isAtivo()) {
             throw new RegraDeNegocioException("Um produto do carrinho nao esta mais disponivel.");

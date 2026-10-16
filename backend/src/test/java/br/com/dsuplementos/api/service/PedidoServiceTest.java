@@ -53,7 +53,7 @@ class PedidoServiceTest {
 
         when(carrinhoRepository.findByUsuarioIdComBloqueio(null)).thenReturn(Optional.of(carrinho));
         when(enderecoRepository.findByIdAndUsuarioId(null, null)).thenReturn(Optional.of(endereco));
-        when(produtoRepository.findByIdAndAtivoTrue(1L)).thenReturn(Optional.of(produto));
+        when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto));
         when(pedidoRepository.save(any(Pedido.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         PedidoResponse pedido = pedidoService.criarPedido(usuario, new CheckoutRequest(null));
@@ -95,7 +95,7 @@ class PedidoServiceTest {
         carrinho.adicionarItem(new ItemCarrinho(carrinho, produto, 2));
         when(carrinhoRepository.findByUsuarioIdComBloqueio(null)).thenReturn(Optional.of(carrinho));
         when(enderecoRepository.findByIdAndUsuarioId(1L, null)).thenReturn(Optional.of(endereco));
-        when(produtoRepository.findByIdAndAtivoTrue(1L)).thenReturn(Optional.of(produto));
+        when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto));
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> pedidoService.criarPedido(usuario, new CheckoutRequest(1L)))
                 .isInstanceOf(br.com.dsuplementos.exception.RegraDeNegocioException.class);
         assertThat(produto.getEstoque()).isEqualTo(estoque);
