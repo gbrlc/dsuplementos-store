@@ -77,7 +77,7 @@ public class CarrinhoApiService {
     }
 
     private Carrinho obterOuCriar(Usuario usuario) {
-        return carrinhoRepository.findByUsuarioId(usuario.getId())
+        return carrinhoRepository.findByUsuarioIdComBloqueio(usuario.getId())
                 .orElseGet(() -> carrinhoRepository.save(new Carrinho(usuario)));
     }
 

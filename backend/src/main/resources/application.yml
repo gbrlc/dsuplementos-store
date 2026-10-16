@@ -25,6 +25,11 @@ spring:
     multipart:
       max-file-size: 5MB
       max-request-size: 20MB
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 
 server:
   port: ${SERVER_PORT:8080}
@@ -48,6 +53,12 @@ app:
     password: ${APP_ADMIN_PASSWORD:}
   seed-catalog:
     enabled: ${APP_SEED_CATALOG:true}
+  messaging:
+    orders:
+      enabled: ${APP_MESSAGING_ORDERS_ENABLED:false}
+      exchange: ${APP_MESSAGING_ORDERS_EXCHANGE:dsuplementos.pedidos}
+      queue: ${APP_MESSAGING_ORDERS_QUEUE:dsuplementos.pedidos.criados}
+      routing-key: ${APP_MESSAGING_ORDERS_ROUTING_KEY:pedido.criado}
 
 springdoc:
   swagger-ui:

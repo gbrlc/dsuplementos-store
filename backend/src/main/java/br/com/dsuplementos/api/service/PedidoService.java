@@ -21,6 +21,7 @@ import br.com.dsuplementos.repository.PedidoRepository;
 import br.com.dsuplementos.repository.ProdutoJpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -35,6 +36,8 @@ public class PedidoService {
     private final CarrinhoRepository carrinhoRepository;
     private final EnderecoRepository enderecoRepository;
     private final ProdutoJpaRepository produtoRepository;
+    @Autowired(required = false)
+    private PedidoMessagePublisher pedidoMessagePublisher;
 
     public PedidoService(
             PedidoRepository pedidoRepository,
@@ -57,7 +60,8 @@ public class PedidoService {
 
     @Transactional
     public PedidoResponse criarPedido(Usuario usuario, CheckoutRequest request) {
-        Carrinho carrinho = obterCarrinhoComItens(usuario);
+        Carrinho carrinho = carrinhoRepository.findByUsuarioIdComBloqueio(usuario.getId())
+                .orElseThrow(() -> new RegraDeNegocioException("O carrinho esta vazio."));
         Endereco endereco = enderecoRepository.findByIdAndUsuarioId(request.enderecoId(), usuario.getId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Endereco nao encontrado."));
 
@@ -67,6 +71,7 @@ public class PedidoService {
         }
 
         List<ProdutoSelecionado> produtosSelecionados = itensCarrinho.stream()
+                .sorted(java.util.Comparator.comparing(item -> item.getProduto().getId()))
                 .map(this::reservarProdutoComEstoqueBloqueado)
                 .toList();
         BigDecimal subtotal = produtosSelecionados.stream()
@@ -81,6 +86,9 @@ public class PedidoService {
 
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
         carrinho.limparItens();
+        if (pedidoMessagePublisher != null) {
+            pedidoMessagePublisher.publicarCriacao(pedidoSalvo);
+        }
         return paraResponse(pedidoSalvo);
     }
 
@@ -109,7 +117,9 @@ public class PedidoService {
             throw new RegraDeNegocioException("Este pedido nao pode mais ser cancelado.");
         }
 
-        for (ItemPedido item : pedido.getItens()) {
+        for (ItemPedido item : pedido.getItens().stream()
+                .filter(i -> i.getProduto() != null)
+                .sorted(java.util.Comparator.comparing(i -> i.getProduto().getId())).toList()) {
             Produto produto = item.getProduto();
             if (produto != null) {
                 Produto produtoBloqueado = produtoRepository.findByIdComBloqueio(produto.getId())

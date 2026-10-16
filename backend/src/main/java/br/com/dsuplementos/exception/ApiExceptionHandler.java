@@ -59,15 +59,15 @@ public class ApiExceptionHandler {
             HttpServletRequest request,
             Map<String, String> campos
     ) {
-        ApiErrorResponse corpo = ApiErrorResponse.builder()
-                .timestamp(Instant.now())
-                .status(status.value())
-                .erro(status.getReasonPhrase())
-                .codigo(codigo)
-                .mensagem(mensagem)
-                .caminho(request.getRequestURI())
-                .campos(campos)
-                .build();
+        ApiErrorResponse corpo = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                codigo,
+                mensagem,
+                request.getRequestURI(),
+                campos
+        );
         return ResponseEntity.status(status).body(corpo);
     }
 }
