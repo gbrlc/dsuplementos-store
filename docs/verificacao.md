@@ -23,13 +23,34 @@ Etapas aprovadas em Java 21 e ambiente com Docker:
 
 As correções foram publicadas e integradas pela [PR #5](https://github.com/gbrlc/dsuplementos-store/pull/5).
 
-## Render: incidente identificado durante a publicação
+## Render: publicação concluída
 
-O Render iniciou automaticamente o deploy do commit `2494d06`. A imagem foi construída, mas a aplicação falhou ao conectar ao banco com `FATAL: (ENOTFOUND) tenant/user ... not found`.
+O primeiro deploy falhou com erro de conexão PostgreSQL `tenant/user not found`. O painel do Supabase confirmou que o projeto existente estava pausado. Ele foi retomado no plano gratuito e apresentou status `Healthy`, sem criar outro banco ou alterar a senha.
 
-O painel do Supabase confirmou que o projeto existente `dsuplementos-store` estava pausado. A retomada foi solicitada no plano gratuito, preservando o banco existente. Na elaboração deste registro, o provedor ainda mostrava `Coming up`; não se apresenta esse primeiro deploy como bem-sucedido.
+Após a retomada, o redeploy do commit `10f7a00` concluiu com `Deploy succeeded | Live` em 16/10/2026 às 14:44, horário de São Paulo. A imagem inicia com Java 21, perfil `prod` e usuário sem privilégios. O Flyway validou o schema existente.
 
-O frontend respondeu HTTP 200. Isso não comprova a API: há catálogo de apresentação como fallback. A validação final deve consultar o catálogo da API, as rotas protegidas e o CORS após o banco voltar e o novo deploy concluir.
+[Deploy confirmado no Render](https://dashboard.render.com/web/srv-daku00ajnfac73fvbqk0/deploys/dep-db963o7btjjs7399vt20).
+
+Verificações HTTP da API publicada:
+
+| Cenário | Resultado |
+| --- | --- |
+| `GET /api/produtos` | HTTP 200, lista de 12 produtos |
+| `GET /api/pedidos` sem autenticação | HTTP 401, código `AUTENTICACAO_NECESSARIA` |
+| `GET /api/admin/produtos` sem autenticação | HTTP 401 |
+| `GET /api/pedidos` com JWT inválido | HTTP 401 |
+| Preflight CORS do frontend publicado | HTTP 200, origem do frontend autorizada |
+| Frontend publicado | HTTP 200 |
+
+Esses resultados são verificações pontuais, não uma garantia de disponibilidade contínua nem um teste completo de vendas autenticadas.
+
+## Supabase: exposição independente da API Java corrigida
+
+O painel apontou tabelas sem RLS. Uma requisição anônima `HEAD` à tabela de usuários, com projeção de ID e limite zero, retornou HTTP 200. Nenhum registro foi obtido nessa verificação.
+
+Como este repositório usa JDBC no backend e não usa SDK, REST ou GraphQL do Supabase, a Data API foi desabilitada no provedor. A configuração salva passou a indicar `Enable Data API: off`, e a consulta externa passou a retornar HTTP 503. As consultas JDBC do backend continuaram funcionando após essa mudança. Não foram alterados registros de clientes ou políticas de cada tabela.
+
+Se a Data API voltar a ser habilitada, será necessário revisar grants e RLS antes de expor as tabelas. [Orientação oficial do Supabase para acesso somente por conexão direta](https://supabase.com/docs/guides/database/secure-data).
 
 ## Limites de escopo
 

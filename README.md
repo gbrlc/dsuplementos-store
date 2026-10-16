@@ -4,7 +4,7 @@ Projeto desenvolvido e entregue para um pequeno comércio de suplementos, com ca
 
 No uso informado pelo cliente, o consumidor consulta o catálogo, solicita o pedido por e-mail e conclui a venda pelo WhatsApp. **Não há pagamento online integrado e um gateway de pagamento não faz parte da necessidade do negócio.**
 
-[Catálogo publicado](https://dsuplementos-store-2.onrender.com/index.html) · [Backend e API](backend/README.md) · [Arquitetura](backend/ARCHITECTURE.md) · [Decisões técnicas](docs/decisoes.md)
+[Catálogo publicado](https://dsuplementos-store-2.onrender.com/index.html) · [Backend e API](backend/README.md) · [Arquitetura](backend/ARCHITECTURE.md) · [Decisões técnicas](docs/decisoes.md) · [Verificação da publicação](docs/verificacao.md)
 
 ## Uso real e escopo do repositório
 
@@ -121,11 +121,13 @@ mvn -f backend/pom.xml verify -DskipITs
 
 Os testes HTTP exercitam o filtro JWT e as permissões reais, com dependências de autenticação simuladas. Os testes de integração `*IT` usam PostgreSQL e as migrations reais para verificar pedidos, rollback e concorrência. Eles não são ignorados automaticamente quando Docker está ausente: a verificação completa deve falhar nesse caso.
 
-O workflow executa a verificação com Java 21, disponibiliza relatórios, constrói a imagem Docker e verifica o catálogo com API e PostgreSQL no Compose. A existência do arquivo não comprova uma execução remota bem-sucedida. Consulte [GitHub Actions](https://github.com/gbrlc/dsuplementos-store/actions) para obter evidências após publicar as mudanças. O workflow não faz deploy.
+O workflow executa a verificação com Java 21, disponibiliza relatórios, constrói a imagem Docker e verifica o catálogo com API e PostgreSQL no Compose. A execução remota foi validada em Java 21 com PostgreSQL/Testcontainers, build e smoke test Docker. Os links e limites das verificações estão no [registro de publicação](docs/verificacao.md). Consulte também [GitHub Actions](https://github.com/gbrlc/dsuplementos-store/actions) para o histórico. O workflow não faz deploy.
 
 ## Deploy e limites conhecidos
 
 O frontend configura a API externa em `frontend/config.js`. O Dockerfile deste repositório entrega somente o backend. Configure no serviço da API banco, chave JWT, `SPRING_PROFILES_ACTIVE=prod`, origens CORS e persistência dos uploads.
+
+No Supabase deste projeto, a Data API está desabilitada: o acesso ao banco passa pelo backend Java via JDBC. Ao recriar o ambiente, confirme essa configuração antes de expor tabelas sem RLS.
 
 A interface contém catálogo de apresentação como fallback. Ver produtos na página não comprova funcionamento da API ou do banco. Valide separadamente `GET /api/produtos`, autenticação e persistência em ambiente de homologação.
 

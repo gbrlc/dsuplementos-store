@@ -49,3 +49,11 @@
 **Decisão:** exigir extensão e MIME de imagem, verificar assinatura binária de JPEG/PNG/WebP e salvar com UUID em diretório delimitado. Fechar streams de leitura explicitamente.
 
 **Consequência:** conteúdo HTML renomeado como imagem é rejeitado. A assinatura não comprova integridade completa do arquivo; não há decodificação integral nem antivírus.
+
+## 9. Supabase usado como PostgreSQL, com Data API desabilitada
+
+**Contexto:** a aplicação acessa o banco via JDBC; o navegador usa somente a API Java. Durante a publicação foi constatado acesso anônimo pela Data API do provedor a uma tabela sem RLS, usando HEAD com limite zero e sem obter registros.
+
+**Decisão:** desabilitar a Data API no painel do Supabase para impedir acesso externo às tabelas por esse caminho. Preservar a conexão JDBC usada pelo backend.
+
+**Consequência:** a configuração é operacional, específica do provedor; não é aplicada por Flyway. Deve ser verificada ao recriar o ambiente. Antes de habilitar SDK/REST/GraphQL do Supabase, revisar grants e RLS. O plano gratuito também pode pausar o projeto; a retomada do banco deve preceder um redeploy se isso ocorrer.
