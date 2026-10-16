@@ -72,7 +72,7 @@ public class PedidoService {
 
         List<ProdutoSelecionado> produtosSelecionados = itensCarrinho.stream()
                 .sorted(java.util.Comparator.comparing(item -> item.getProduto().getId()))
-                .map(this::reservarProdutoComEstoqueBloqueado)
+                .map(this::selecionarProdutoAtivo)
                 .toList();
         BigDecimal subtotal = produtosSelecionados.stream()
                 .map(item -> item.produto().getPreco().multiply(BigDecimal.valueOf(item.quantidade())))
@@ -87,7 +87,7 @@ public class PedidoService {
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
         carrinho.limparItens();
         if (pedidoMessagePublisher != null) {
-            pedidoMessagePublisher.publicarCriacao(pedidoSalvo);
+            pedidoMessagePublisher.publicarCriacao(pedidoSalvo, usuario);
         }
         return paraResponse(pedidoSalvo);
     }
@@ -117,16 +117,6 @@ public class PedidoService {
             throw new RegraDeNegocioException("Este pedido nao pode mais ser cancelado.");
         }
 
-        for (ItemPedido item : pedido.getItens().stream()
-                .filter(i -> i.getProduto() != null)
-                .sorted(java.util.Comparator.comparing(i -> i.getProduto().getId())).toList()) {
-            Produto produto = item.getProduto();
-            if (produto != null) {
-                Produto produtoBloqueado = produtoRepository.findByIdComBloqueio(produto.getId())
-                        .orElseThrow(() -> new RecursoNaoEncontradoException("Produto do pedido nao encontrado."));
-                produtoBloqueado.atualizarEstoque(produtoBloqueado.getEstoque() + item.getQuantidade());
-            }
-        }
         pedido.cancelar();
         return paraResponse(pedido);
     }
@@ -140,16 +130,12 @@ public class PedidoService {
         return carrinho;
     }
 
-    private ProdutoSelecionado reservarProdutoComEstoqueBloqueado(ItemCarrinho itemCarrinho) {
-        Produto produto = produtoRepository.findByIdComBloqueio(itemCarrinho.getProduto().getId())
+    private ProdutoSelecionado selecionarProdutoAtivo(ItemCarrinho itemCarrinho) {
+        Produto produto = produtoRepository.findById(itemCarrinho.getProduto().getId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Produto nao encontrado."));
         if (!produto.isAtivo()) {
             throw new RegraDeNegocioException("Um produto do carrinho nao esta mais disponivel.");
         }
-        if (produto.getEstoque() < itemCarrinho.getQuantidade()) {
-            throw new RegraDeNegocioException("Estoque insuficiente para " + produto.getNome() + ".");
-        }
-        produto.atualizarEstoque(produto.getEstoque() - itemCarrinho.getQuantidade());
         return new ProdutoSelecionado(produto, itemCarrinho.getQuantidade());
     }
 

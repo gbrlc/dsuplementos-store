@@ -1,6 +1,6 @@
 # Backend - DSuplementos API
 
-Esta documentação descreve os recursos presentes na API. O uso comercial informado é catálogo, solicitação por e-mail e fechamento pelo WhatsApp; a integração de envio de e-mail não foi identificada neste código. Checkout, frete e pagamento simulado são recursos demonstrativos e não comprovam venda ou recebimento. Veja o [README principal](../README.md) para execução, testes e limites.
+Esta documentação descreve os recursos presentes na API. O uso comercial informado é catálogo, solicitação por e-mail e fechamento pelo WhatsApp; o envio assíncrono para a loja foi implementado, mas ainda exige configuração externa e validação de entrega. Veja [e-mail e estoque](../docs/email-pedidos.md). Checkout, frete e pagamento simulado são recursos demonstrativos e não comprovam venda ou recebimento. Veja o [README principal](../README.md) para execução, testes e limites.
 
 API REST criada com Spring Boot para substituir os dados em memória por PostgreSQL e servir o frontend da DSuplementos Store.
 
@@ -116,7 +116,7 @@ O catálogo inicial é carregado automaticamente no primeiro início. Para criar
 | `POST` | `/api/favoritos/{produtoId}` | Salva produto nos favoritos |
 | `DELETE` | `/api/favoritos/{produtoId}` | Remove produto dos favoritos |
 | `GET` | `/api/pedidos/simulacao-frete` | Simula frete a partir dos itens no carrinho |
-| `POST` | `/api/pedidos` | Cria pedido, reserva estoque e limpa o carrinho |
+| `POST` | `/api/pedidos` | Registra solicitação e limpa o carrinho, sem alterar estoque |
 | `GET` | `/api/pedidos` | Lista pedidos da conta autenticada |
 | `POST` | `/api/pedidos/{id}/pagamento-simulado` | Muda pedido criado para pago |
-| `POST` | `/api/pedidos/{id}/cancelamento` | Cancela pedido permitido e recompõe o estoque |
+| `POST` | `/api/pedidos/{id}/cancelamento` | Cancela solicitação permitida, sem alterar estoque |

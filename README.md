@@ -2,7 +2,7 @@
 
 Projeto desenvolvido e entregue para um pequeno comércio de suplementos, com catálogo online e uma API em Java 21 e Spring Boot.
 
-No uso informado pelo cliente, o consumidor consulta o catálogo, solicita o pedido por e-mail e conclui a venda pelo WhatsApp. **Não há pagamento online integrado e um gateway de pagamento não faz parte da necessidade do negócio.**
+O cliente utiliza o catálogo online e conclui as vendas pelo WhatsApp. O envio de solicitações por e-mail está sendo acrescentado e ainda depende de configuração externa para entrar em operação. **Não há pagamento online integrado e um gateway de pagamento não faz parte da necessidade do negócio.**
 
 [Catálogo publicado](https://dsuplementos-store-2.onrender.com/index.html) · [Backend e API](backend/README.md) · [Arquitetura](backend/ARCHITECTURE.md) · [Decisões técnicas](docs/decisoes.md) · [Verificação da publicação](docs/verificacao.md)
 
@@ -10,13 +10,13 @@ No uso informado pelo cliente, o consumidor consulta o catálogo, solicita o ped
 
 | Contexto | Descrição |
 | --- | --- |
-| Operação do cliente | Catálogo → solicitação por e-mail → atendimento e fechamento pelo WhatsApp, conforme contexto informado pelo responsável pelo projeto |
+| Operação pretendida | Catálogo → solicitação por e-mail à loja → atendimento e fechamento pelo WhatsApp. O envio está implementado na branch de trabalho, mas ainda não foi ativado em produção |
 | Implementação presente | API de catálogo, usuários, endereços, carrinho, pedidos, estoque, favoritos e avaliações; interface HTML/CSS/JavaScript |
 | Recursos demonstrativos | Simulação de frete e pagamento, sem integração financeira. O estado `PAGO` pode ser marcado pelo próprio cliente no fluxo simulado e não comprova recebimento de dinheiro |
-| Integração ainda não identificada | O mecanismo de envio de solicitações por e-mail e encaminhamento ao WhatsApp não foi localizado neste código. Não se atribui esse envio à API sem evidência |
-| Mensageria opcional | Publicação RabbitMQ de `pedido.criado`, desabilitada por padrão; não envia e-mail nem conclui vendas |
+| Envio de e-mail | Foi acrescentado envio assíncrono de solicitações à loja via RabbitMQ e Resend HTTPS. A ativação depende de remetente, destinatário, chave e broker configurados; entrega real ainda não foi verificada |
+| Mensageria opcional | Outbox PostgreSQL, RabbitMQ e consumidor de e-mail via Resend, desabilitados por padrão; não concluem vendas |
 
-A API reserva estoque ao criar um pedido e o devolve em cancelamentos permitidos. Esse comportamento técnico não equivale a uma venda concluída pelo WhatsApp. A conciliação com vendas externas e o prazo de reserva precisam ser definidos com o comércio antes de usar esse fluxo como controle operacional definitivo.
+Conforme a operação informada pelo comércio, não há controle automático de saldo: solicitações e cancelamentos não alteram estoque, e a disponibilidade é confirmada no atendimento. Produtos podem ser desativados no catálogo. Veja [envio de e-mail e política de estoque](docs/email-pedidos.md).
 
 ## Stack e organização
 
@@ -133,7 +133,7 @@ A interface contém catálogo de apresentação como fallback. Ver produtos na p
 
 - Não há gateway de pagamento, cálculo logístico externo ou confirmação financeira.
 - JWTs já emitidos continuam válidos até expirar, inclusive após logout ou troca de senha; refresh tokens são revogados.
-- Publicação RabbitMQ ocorre após commit, sem outbox ou reentrega garantida. Falhas são registradas em log.
+- E-mail usa outbox transacional, RabbitMQ e retries limitados. Aceite do provedor não comprova entrega; ativação real depende de configuração externa. Veja [limites e operação](docs/email-pedidos.md).
 - Uploads verificam extensão, MIME declarado e assinatura de formato, mas não fazem análise completa de imagens ou antivírus.
 - Uploads usam filesystem; a persistência depende do volume/disco configurado no deploy.
 - O catálogo ainda filtra e ordena em memória.

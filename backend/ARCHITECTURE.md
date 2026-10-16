@@ -1,114 +1,63 @@
 # Arquitetura do backend DSuplementos
 
-Este documento descreve como a API é organizada, quais invariantes protege e onde estão seus limites operacionais. A implementação principal inicia em `DsuplementosApplication.java`; as classes Java sem Spring preservadas no repositório representam uma etapa anterior do projeto e não participam da API publicada.
+Monólito Spring Boot em camadas. O frontend é servido separadamente e usa HTTP/JSON com JWT para acessar a API. A implementação inicia em `DsuplementosApplication`; `Main`, `model` e `service` preservam uma etapa anterior em Java puro.
 
-## Componentes
+## Fluxo principal
 
 ```text
-HTTP request
-    │
-    ▼
-SecurityFilterChain
-    │ JWT válido e autorização
-    ▼
-Controller
-    │ DTO validado
-    ▼
-Service transacional
-    │ regra de negócio
-    ▼
-Spring Data Repository
-    │
-    ▼
-PostgreSQL
+Frontend -> SecurityFilterChain -> Controller -> Service transacional -> PostgreSQL
+                                                      |
+                                                      +-> outbox notificacoes_pedido
+                                                               |
+                                                          dispatcher agendado
+                                                               |
+                                                            RabbitMQ
+                                                               |
+                                                         consumidor -> Resend HTTPS -> loja
 ```
 
-### Controllers
+Controllers definem contratos e validam DTOs. Services aplicam regras e propriedade de recursos. Repositories JPA e JDBC persistem dados. DTOs e MapStruct evitam expor entidades diretamente.
 
-Os controllers definem as rotas de autenticação, usuário, produtos, marcas, carrinho, favoritos, avaliações, pedidos e administração. Eles recebem DTOs, aplicam validação estrutural e delegam o caso de uso. Regras que dependem do estado do domínio permanecem nos services.
+## Negócio
 
-### Services
+O catálogo gera solicitações de interesse, e a venda é concluída no atendimento pelo WhatsApp. Não há gateway de pagamento. Frete e pagamento presentes no código são simulações.
 
-Os services orquestram repositories e aplicam regras como:
+Conforme orientação do comércio, a aplicação não mantém controle automático de saldo. Criar/cancelar solicitações não altera estoque e saldo numérico não limita itens. Produtos inativos continuam sendo rejeitados. O campo legado de estoque não é apresentado como saldo físico sincronizado.
 
-- verificar propriedade do endereço, pedido, favorito ou avaliação;
-- calcular valores a partir dos produtos persistidos;
-- reservar e recompor estoque;
-- validar transições de status do pedido;
-- rotacionar e revogar refresh tokens;
-- transformar entidades em respostas estáveis da API.
+## Pedido e consistência
 
-### Repositories
+A criação bloqueia o carrinho existente, valida o endereço do próprio usuário, rejeita carrinho vazio e produtos inativos, calcula valores no servidor, grava snapshots de itens/endereço e limpa o carrinho na mesma transação.
 
-Os repositories usam Spring Data JPA. Consultas específicas carregam agregados necessários aos casos de uso e evitam transferir decisões de negócio para os controllers.
+Quando e-mail está habilitado, a mesma transação grava o payload da notificação na outbox. Falha ao preparar a notificação desfaz também o pedido; o envio externo não ocorre nessa transação. O cancelamento bloqueia o pedido e valida sua transição, sem recompor saldo.
 
-### DTOs e mapeamento
+Snapshots preservam nome, preço e endereço daquele instante, mesmo que catálogo ou cadastro sejam alterados depois.
 
-Requests e responses são contratos separados das entidades. Isso impede acoplamento direto do JSON ao modelo persistido, limita campos alteráveis pelo cliente e mantém liberdade para evoluir banco e API de forma independente.
+## Notificações
 
-## Autenticação e autorização
+Dispatcher usa `FOR UPDATE SKIP LOCKED` para publicar IDs pendentes no RabbitMQ, sem dados pessoais no broker. O consumidor bloqueia a linha da notificação para evitar processamento concorrente e ignora registros já enviados. O payload é imutável, e a chamada HTTPS usa chave de idempotência por pedido.
 
-1. No cadastro, a senha é codificada com BCrypt.
-2. No login, credenciais válidas geram um JWT e um refresh token opaco.
-3. O hash do refresh token é persistido; o valor original só é devolvido ao cliente.
-4. O filtro JWT lê `Authorization: Bearer <token>` e popula o contexto de segurança.
-5. A `SecurityFilterChain` libera somente rotas públicas explícitas.
-6. `/api/admin/**` exige o perfil `ADMIN`; demais operações privadas exigem autenticação.
-7. Services ainda verificam autorização contextual, como a propriedade de um recurso.
+Há filas duráveis, dead-letter para rejeições técnicas, republicação de pendências e até oito tentativas de envio com backoff. O aceite pelo provedor não confirma entrega na caixa de entrada. Interrupções superiores à janela de idempotência do provedor podem exigir reconciliação manual. A operação em Render gratuito depende também da instância estar acordada.
 
-A aplicação não mantém sessão HTTP no servidor. Logout, rotação e troca de senha atuam sobre refresh tokens persistidos; JWTs já emitidos permanecem válidos apenas até sua expiração.
+A integração fica desabilitada por padrão. Conta de envio, remetente autorizado, destinatário e broker externo devem ser configurados antes de afirmar que e-mails reais estão sendo enviados. Veja [configuração e limites](../docs/email-pedidos.md).
 
-## Criação de pedido
+## Segurança
 
-O checkout executa em uma transação:
+- BCrypt para senhas, JWT de duração limitada e refresh tokens opacos persistidos por SHA-256.
+- Renovação e revogação bloqueiam a linha do refresh token; AuthService emite o substituto na transação de renovação.
+- Rotas públicas explícitas, perfil `ADMIN` em `/api/admin/**` e verificação de propriedade nos services.
+- Logout e troca de senha revogam refresh tokens; JWTs emitidos continuam válidos até expirar.
+- Upload verifica extensão, MIME declarado e assinatura binária; não faz análise completa ou antivírus.
+- No Supabase de produção, Data API desabilitada; somente backend Java acessa o banco via JDBC. Essa configuração operacional deve ser reproduzida em novos ambientes.
+- Logs de e-mail não incluem corpo HTTP do provedor, payload ou chaves.
 
-1. identifica o usuário autenticado;
-2. carrega carrinho e endereço pertencentes ao usuário;
-3. rejeita carrinho vazio;
-4. consulta produtos e valida estoque;
-5. calcula preços e total usando dados persistidos;
-6. reduz estoque e cria snapshots dos itens;
-7. copia o endereço de entrega para o pedido;
-8. persiste o pedido e limpa o carrinho;
-9. registra o envio do evento para depois do commit, quando RabbitMQ está habilitado.
+## Persistência e execução
 
-O cliente não controla o preço final nem a disponibilidade considerada pelo backend.
+Flyway aplica migrations de `database/migrations`, empacotadas em `db/migration`. Hibernate usa `ddl-auto: validate`. O perfil `prod` desabilita Swagger, catálogo de exemplo e limpeza do Flyway; configuração sensível entra pelo ambiente.
 
-## Cancelamento e estoque
+O Dockerfile entrega somente a API, com Java 21 e usuário sem privilégios. Compose inclui PostgreSQL, API e RabbitMQ opcional com volume persistente. O frontend usa a URL externa configurada em `frontend/config.js`.
 
-O cancelamento é permitido apenas para estados previstos pela regra de negócio. Quando aceito, devolve ao estoque as quantidades registradas nos itens e atualiza o status do pedido na mesma fronteira transacional.
+## Verificação
 
-## Persistência
+JUnit/Mockito cobrem regras isoladas; MockMvc exercita filtro JWT e permissões HTTP. Testcontainers/PostgreSQL verifica migrations, rollback, concorrência e ausência de alterações no saldo legado. A integração de e-mail usa PostgreSQL e RabbitMQ reais em containers, com gateway de e-mail simulado; um servidor HTTP local verifica o contrato do adaptador Resend sem enviar mensagens reais.
 
-O Flyway aplica os scripts de `database/migrations` na inicialização. O Hibernate usa `ddl-auto: validate`, portanto uma divergência entre entidades e schema interrompe a subida em vez de modificar o banco automaticamente.
-
-As migrations incluem estrutura inicial, refresh tokens, auditoria, índices, snapshot de entrega e favoritos. Em produção, a limpeza do Flyway permanece desabilitada.
-
-## Tratamento de erros
-
-`ApiExceptionHandler` converte falhas de validação, autenticação, autorização, recursos ausentes e regras de negócio em um contrato JSON consistente. O cliente recebe código, mensagem, status, caminho e detalhes de campos quando aplicável, sem stack trace.
-
-## Mensageria
-
-O publisher RabbitMQ usa exchange, fila e routing key configuráveis. A integração é desabilitada por padrão e não muda o contrato HTTP do checkout.
-
-O modelo atual envia após commit, no mesmo processo. Falhas AMQP são registradas em log, sem desfazer um pedido já confirmado. Ainda não há garantia atômica entre commit do banco e envio ao broker, nem reentrega automática. Um transactional outbox é a evolução indicada quando a perda eventual de evento deixar de ser aceitável.
-
-## Perfis de execução
-
-- **dev:** SQL visível, catálogo inicial habilitado e Swagger disponível.
-- **prod:** catálogo de exemplo desabilitado, Swagger desativado e Flyway clean bloqueado.
-
-Configurações sensíveis entram por variáveis de ambiente e não devem ser versionadas.
-
-## Estratégia de testes
-
-A suíte usa JUnit 5 e Mockito para testar regras isoladas de pedido, usuário, favoritos e refresh token, além do contrato de paginação. O pipeline executa `mvn clean verify`.
-
-A suíte inclui MockMvc com a configuração real de segurança e testes PostgreSQL/Testcontainers (`*IT`) para pedidos, rollback e concorrência. `mvn test` executa testes unitários e HTTP; `mvn verify` também exige Docker e executa integração. A existência dos testes não substitui os relatórios de execução.
-
-## Negócio e decisões
-
-O uso comercial informado é catálogo → solicitação por e-mail → fechamento pelo WhatsApp. O mecanismo de e-mail não foi identificado neste repositório. Pagamento e frete são simulações; pedido criado não confirma uma venda externa. A API e o frontend são entregues separadamente; o Dockerfile inclui apenas o backend.
-
-Consulte [decisões técnicas](../docs/decisoes.md) para bloqueios, reservas, sessão, mensageria e limitações. Pedidos e refresh tokens são carregados com bloqueio de escrita para as operações de transição; alterações administrativas de produtos usam o mesmo bloqueio do estoque.
+`mvn test` executa testes unitários/HTTP. `mvn verify` também exige Docker e executa `*IT`. CI usa Java 21, publica relatórios, constrói a imagem e testa a API com banco no Compose. O [registro anterior de publicação](../docs/verificacao.md) é histórico e não comprova a ativação da nova integração de e-mail.

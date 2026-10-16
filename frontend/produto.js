@@ -58,9 +58,9 @@ function renderizarProduto(produto) {
       <p class="detail-description">${escaparHtml(produto.descricao)}</p>
       <div class="detail-purchase">
         <strong>${formatarMoeda(produto.preco)}</strong>
-        <span>${produto.estoque > 0 ? `${produto.estoque} unidades em estoque` : "Produto indisponível"}</span>
+        <span>Disponibilidade confirmada pela loja no atendimento</span>
       </div>
-      <button class="button button-primary detail-add" type="button" ${produto.estoque === 0 ? "disabled" : ""}>Adicionar ao carrinho</button>
+      <button class="button button-primary detail-add" type="button" >Adicionar ao carrinho</button>
     </div>
   `;
 

@@ -39,7 +39,7 @@ class PedidoServiceTest {
     );
 
     @Test
-    void deveCriarPedidoBaixarEstoqueELimparCarrinho() {
+    void deveCriarSolicitacaoSemBaixarEstoqueELimparCarrinho() {
         Usuario usuario = new Usuario("Ana Cliente", "ana@example.com", "hash", Role.CLIENTE);
         Produto produto = new Produto(
                 "Whey", Categoria.WHEY, null, new BigDecimal("100.00"), 10, "Proteina", null
@@ -53,7 +53,7 @@ class PedidoServiceTest {
 
         when(carrinhoRepository.findByUsuarioIdComBloqueio(null)).thenReturn(Optional.of(carrinho));
         when(enderecoRepository.findByIdAndUsuarioId(null, null)).thenReturn(Optional.of(endereco));
-        when(produtoRepository.findByIdComBloqueio(1L)).thenReturn(Optional.of(produto));
+        when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto));
         when(pedidoRepository.save(any(Pedido.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         PedidoResponse pedido = pedidoService.criarPedido(usuario, new CheckoutRequest(null));
@@ -63,7 +63,7 @@ class PedidoServiceTest {
         assertThat(pedido.frete()).isEqualByComparingTo("0.00");
         assertThat(pedido.total()).isEqualByComparingTo("200.00");
         assertThat(pedido.itens()).hasSize(1);
-        assertThat(produto.getEstoque()).isEqualTo(8);
+        assertThat(produto.getEstoque()).isEqualTo(10);
         assertThat(carrinho.getItens()).isEmpty();
     }
     @Test void deveRecusarCarrinhoVazio() {
@@ -82,9 +82,6 @@ class PedidoServiceTest {
         org.mockito.Mockito.verifyNoInteractions(produtoRepository);
     }
 
-    @Test void estoqueInsuficienteNaoCriaPedido() {
-        validarProdutoIndisponivel(true, 1);
-    }
     @Test void produtoInativoNaoCriaPedido() {
         validarProdutoIndisponivel(false, 10);
     }
@@ -98,7 +95,7 @@ class PedidoServiceTest {
         carrinho.adicionarItem(new ItemCarrinho(carrinho, produto, 2));
         when(carrinhoRepository.findByUsuarioIdComBloqueio(null)).thenReturn(Optional.of(carrinho));
         when(enderecoRepository.findByIdAndUsuarioId(1L, null)).thenReturn(Optional.of(endereco));
-        when(produtoRepository.findByIdComBloqueio(1L)).thenReturn(Optional.of(produto));
+        when(produtoRepository.findById(1L)).thenReturn(Optional.of(produto));
         org.assertj.core.api.Assertions.assertThatThrownBy(() -> pedidoService.criarPedido(usuario, new CheckoutRequest(1L)))
                 .isInstanceOf(br.com.dsuplementos.exception.RegraDeNegocioException.class);
         assertThat(produto.getEstoque()).isEqualTo(estoque);
