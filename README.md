@@ -2,7 +2,7 @@
 
 Projeto desenvolvido e entregue para um pequeno comércio de suplementos, com catálogo online e uma API em Java 21 e Spring Boot.
 
-No uso informado pelo cliente, o consumidor consulta o catálogo, solicita o pedido por e-mail e conclui a venda pelo WhatsApp. **Não há pagamento online integrado e um gateway de pagamento não faz parte da necessidade do negócio.**
+O cliente utiliza o catálogo online e conclui as vendas pelo WhatsApp. O envio de solicitações por e-mail está sendo acrescentado e ainda depende de configuração externa para entrar em operação. **Não há pagamento online integrado e um gateway de pagamento não faz parte da necessidade do negócio.**
 
 [Catálogo publicado](https://dsuplementos-store-2.onrender.com/index.html) · [Backend e API](backend/README.md) · [Arquitetura](backend/ARCHITECTURE.md) · [Decisões técnicas](docs/decisoes.md) · [Verificação da publicação](docs/verificacao.md)
 
@@ -10,7 +10,7 @@ No uso informado pelo cliente, o consumidor consulta o catálogo, solicita o ped
 
 | Contexto | Descrição |
 | --- | --- |
-| Operação do cliente | Catálogo → solicitação por e-mail → atendimento e fechamento pelo WhatsApp, conforme contexto informado pelo responsável pelo projeto |
+| Operação pretendida | Catálogo → solicitação por e-mail à loja → atendimento e fechamento pelo WhatsApp. O envio está implementado na branch de trabalho, mas ainda não foi ativado em produção |
 | Implementação presente | API de catálogo, usuários, endereços, carrinho, pedidos, estoque, favoritos e avaliações; interface HTML/CSS/JavaScript |
 | Recursos demonstrativos | Simulação de frete e pagamento, sem integração financeira. O estado `PAGO` pode ser marcado pelo próprio cliente no fluxo simulado e não comprova recebimento de dinheiro |
 | Envio de e-mail | Foi acrescentado envio assíncrono de solicitações à loja via RabbitMQ e Resend HTTPS. A ativação depende de remetente, destinatário, chave e broker configurados; entrega real ainda não foi verificada |
